@@ -45,3 +45,17 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = 'com.github.lokile'
+                artifactId = 'data_encrypter'
+                version = '0.0.3'
+            }
+        }
+    }
+}
