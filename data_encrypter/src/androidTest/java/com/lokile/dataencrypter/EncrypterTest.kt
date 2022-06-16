@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 
 
 @RunWith(AndroidJUnit4::class)
-class ByteEncrypterImpTest {
+class EncrypterTest {
     var encrypters = mutableListOf<IEncrypter>()
 
     @After
