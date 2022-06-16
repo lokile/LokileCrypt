@@ -4,59 +4,6 @@ plugins {
     id 'maven-publish'
 }
 
-
-def githubProperties = new Properties()
-githubProperties.load(new FileInputStream(rootProject.file("github.properties")))
-
-publishing {
-    publications {
-        bar(MavenPublication) {
-            groupId 'com.lokile'
-            artifactId "data_encrypter"
-            version "0.0.1"
-            artifact("$buildDir/outputs/aar/LokileDataEncrypter-release.aar")
-
-            pom.withXml {
-                final dependenciesNode = asNode().appendNode('dependencies')
-                ext.addDependency = { Dependency dep, String scope ->
-                    if (dep.group == null || dep.version == null || dep.name == null || dep.name == "unspecified")
-                        return
-                    final dependencyNode = dependenciesNode.appendNode('dependency')
-                    dependencyNode.appendNode('groupId', dep.group)
-                    dependencyNode.appendNode('artifactId', dep.name)
-                    dependencyNode.appendNode('version', dep.version)
-                    dependencyNode.appendNode('scope', scope)
-                    if (!dep.transitive) {
-                        final exclusionNode = dependencyNode.appendNode('exclusions').appendNode('exclusion')
-                        exclusionNode.appendNode('groupId', '*')
-                        exclusionNode.appendNode('artifactId', '*')
-                    } else if (!dep.properties.excludeRules.empty) {
-                        final exclusionNode = dependencyNode.appendNode('exclusions').appendNode('exclusion')
-                        dep.properties.excludeRules.each { ExcludeRule rule ->
-                            exclusionNode.appendNode('groupId', rule.group ?: '*')
-                            exclusionNode.appendNode('artifactId', rule.module ?: '*')
-                        }
-                    }
-                }
-                configurations.implementation.getDependencies().each { dep -> addDependency(dep, "implementation") }
-                configurations.api.getDependencies().each { dep -> addDependency(dep, "implementation") }
-                configurations.implementation.getDependencies().each { dep -> addDependency(dep, "runtime") }
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/lebaloczzz/data_encrypter")
-            credentials {
-                username = githubProperties['gpr.usr']
-                password = githubProperties['gpr.key']
-            }
-        }
-    }
-}
-
 android {
     compileSdk 32
 
