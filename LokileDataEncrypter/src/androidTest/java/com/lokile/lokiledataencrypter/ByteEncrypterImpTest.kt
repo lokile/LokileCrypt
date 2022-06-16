@@ -55,16 +55,17 @@ class ByteEncrypterImpTest {
             assertNotNull(decrypted)
 
             assertEquals(source, String(decrypted!!))
-            encrypter.resetKeys()
+            assertFalse(
+                encrypter.encrypt(source.toByteArray())!!.toByteArray().contentEquals(
+                    encrypted.toByteArray()
+                )
+            )
 
+            encrypter.resetKeys()
             val decrypted2 = encrypter.decrypt(encrypted)
             assertNull(decrypted2)
 
-            assertFalse(
-                encrypter.encrypt(source.toByteArray()).contentEquals(
-                    encrypted
-                )
-            )
+
         }
     }
 }

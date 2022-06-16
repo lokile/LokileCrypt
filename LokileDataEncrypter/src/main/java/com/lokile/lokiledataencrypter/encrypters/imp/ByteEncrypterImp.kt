@@ -2,11 +2,11 @@ package com.lokile.lokiledataencrypter.encrypters.imp
 
 import android.content.Context
 import android.os.Build
+import com.lokile.lokiledataencrypter.encrypters.EncryptedData
 import com.lokile.lokiledataencrypter.encrypters.IByteEncrypter
 import com.lokile.lokiledataencrypter.secretKeyProviders.ISecretKeyProvider
 import com.lokile.lokiledataencrypter.secretKeyProviders.imp.AESSecretKeyProvider
 import com.lokile.lokiledataencrypter.secretKeyProviders.imp.RSASecretKeyProvider
-import java.nio.ByteBuffer
 import java.security.Key
 import java.util.*
 import javax.crypto.Cipher
@@ -42,18 +42,30 @@ class ByteEncrypterImp : IByteEncrypter {
             keyProvider.getSecretKey() ?: throw Exception("Error when loading the secretKey")
     }
 
-    override fun encrypt(data: ByteArray): ByteArray? {
+    override fun encrypt(data: ByteArray, iv: ByteArray?): EncryptedData? {
+        try {
+            if (iv != null) {
+                cipher.init(
+                    Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(iv)
+                )
+            } else {
+                cipher.init(
+                    Cipher.ENCRYPT_MODE, secretKey
+                )
+            }
+            return EncryptedData(cipher.doFinal(data), cipher.iv)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+    }
+
+    override fun decrypt(data: EncryptedData): ByteArray? {
         try {
             cipher.init(
-                Cipher.ENCRYPT_MODE, secretKey
+                Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(data.iv)
             )
-            val output = cipher.doFinal(data)
-            return ByteBuffer.allocate(cipher.iv.size + output.size + 1)
-                .apply {
-                    put(cipher.iv.size.toByte())
-                    put(cipher.iv)
-                    put(output)
-                }.array()
+            return cipher.doFinal(data.data)
         } catch (e: Exception) {
             e.printStackTrace()
             return null
@@ -61,18 +73,13 @@ class ByteEncrypterImp : IByteEncrypter {
     }
 
     override fun decrypt(data: ByteArray): ByteArray? {
-        return try {
-            val ivSize = data[0].toInt()
-            val encryptedData = Arrays.copyOfRange(data, ivSize + 1, data.size)
-            val ivSpec = IvParameterSpec(
+        val ivSize = data[0].toInt()
+        return decrypt(
+            EncryptedData(
+                Arrays.copyOfRange(data, ivSize + 1, data.size),
                 Arrays.copyOfRange(data, 1, ivSize + 1)
             )
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec)
-            cipher.doFinal(encryptedData)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+        )
     }
 
     override fun resetKeys() {
