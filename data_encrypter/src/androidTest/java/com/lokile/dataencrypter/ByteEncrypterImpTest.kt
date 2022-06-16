@@ -3,8 +3,8 @@ package com.lokile.dataencrypter
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.lokile.dataencrypter.encrypters.IByteEncrypter
-import com.lokile.dataencrypter.encrypters.imp.ByteEncrypterImp
+import com.lokile.dataencrypter.encrypters.IEncrypter
+import com.lokile.dataencrypter.encrypters.imp.Encrypter
 import com.lokile.dataencrypter.secretKeyProviders.imp.AESSecretKeyProvider
 import com.lokile.dataencrypter.secretKeyProviders.imp.PasswordSecretKeyProvider
 import com.lokile.dataencrypter.secretKeyProviders.imp.RSASecretKeyProvider
@@ -17,7 +17,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ByteEncrypterImpTest {
-    var encrypters = mutableListOf<IByteEncrypter>()
+    var encrypters = mutableListOf<IEncrypter>()
 
     @After
     fun tearDown() {
@@ -31,16 +31,16 @@ class ByteEncrypterImpTest {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             encrypters.add(
-                ByteEncrypterImp(AESSecretKeyProvider("p1"))
+                Encrypter(AESSecretKeyProvider("p1"))
             )
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             encrypters.add(
-                ByteEncrypterImp(RSASecretKeyProvider(context = appContext, "p2"))
+                Encrypter(RSASecretKeyProvider(context = appContext, "p2"))
             )
         }
         encrypters.add(
-            ByteEncrypterImp(PasswordSecretKeyProvider(appContext, "p3", "demoPassword"))
+            Encrypter(PasswordSecretKeyProvider(appContext, "p3", "demoPassword"))
         )
     }
 
@@ -63,9 +63,8 @@ class ByteEncrypterImpTest {
 
             encrypter.resetKeys()
             val decrypted2 = encrypter.decrypt(encrypted)
+
             assertNull(decrypted2)
-
-
         }
     }
 }

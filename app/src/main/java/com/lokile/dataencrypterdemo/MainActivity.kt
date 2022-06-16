@@ -3,7 +3,7 @@ package com.lokile.dataencrypterdemo
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.lokile.dataencrypter.encrypters.imp.ByteEncrypterImp
+import com.lokile.dataencrypter.encrypters.imp.Encrypter
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun demoByteEncrypter() {
-        val e = ByteEncrypterImp(this, "demo")
+        val e = Encrypter(this, "demo")
         val source = "demo123"
         val encrypted = e.encrypt(source.toByteArray())
         if (encrypted != null) {

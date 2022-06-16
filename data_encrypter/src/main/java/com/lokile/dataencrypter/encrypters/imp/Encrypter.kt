@@ -2,8 +2,9 @@ package com.lokile.dataencrypter.encrypters.imp
 
 import android.content.Context
 import android.os.Build
+import android.util.Base64
 import com.lokile.dataencrypter.encrypters.EncryptedData
-import com.lokile.dataencrypter.encrypters.IByteEncrypter
+import com.lokile.dataencrypter.encrypters.IEncrypter
 import com.lokile.dataencrypter.secretKeyProviders.ISecretKeyProvider
 import com.lokile.dataencrypter.secretKeyProviders.imp.AESSecretKeyProvider
 import com.lokile.dataencrypter.secretKeyProviders.imp.RSASecretKeyProvider
@@ -12,7 +13,7 @@ import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 
-class ByteEncrypterImp : IByteEncrypter {
+class Encrypter : IEncrypter {
 
     private var keyProvider: ISecretKeyProvider
     private val cipher = Cipher.getInstance("AES/CBC/PKCS7PADDING")
@@ -60,6 +61,10 @@ class ByteEncrypterImp : IByteEncrypter {
         }
     }
 
+    override fun encryptToString(data: String, iv: ByteArray?): String? {
+        return encrypt(data.toByteArray(), iv)?.toStringData()
+    }
+
     override fun decrypt(data: EncryptedData): ByteArray? {
         try {
             cipher.init(
@@ -80,6 +85,10 @@ class ByteEncrypterImp : IByteEncrypter {
                 Arrays.copyOfRange(data, 1, ivSize + 1)
             )
         )
+    }
+
+    override fun decryptToString(data: String): String? {
+        return decrypt(Base64.decode(data, Base64.DEFAULT))?.let { String(it) }
     }
 
     override fun resetKeys() {
