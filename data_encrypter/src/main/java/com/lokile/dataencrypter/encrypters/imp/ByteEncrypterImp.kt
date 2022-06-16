@@ -1,12 +1,12 @@
-package com.lokile.lokiledataencrypter.encrypters.imp
+package com.lokile.dataencrypter.encrypters.imp
 
 import android.content.Context
 import android.os.Build
-import com.lokile.lokiledataencrypter.encrypters.EncryptedData
-import com.lokile.lokiledataencrypter.encrypters.IByteEncrypter
-import com.lokile.lokiledataencrypter.secretKeyProviders.ISecretKeyProvider
-import com.lokile.lokiledataencrypter.secretKeyProviders.imp.AESSecretKeyProvider
-import com.lokile.lokiledataencrypter.secretKeyProviders.imp.RSASecretKeyProvider
+import com.lokile.dataencrypter.encrypters.EncryptedData
+import com.lokile.dataencrypter.encrypters.IByteEncrypter
+import com.lokile.dataencrypter.secretKeyProviders.ISecretKeyProvider
+import com.lokile.dataencrypter.secretKeyProviders.imp.AESSecretKeyProvider
+import com.lokile.dataencrypter.secretKeyProviders.imp.RSASecretKeyProvider
 import java.security.Key
 import java.util.*
 import javax.crypto.Cipher

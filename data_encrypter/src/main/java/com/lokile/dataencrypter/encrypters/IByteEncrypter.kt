@@ -1,4 +1,4 @@
-package com.lokile.lokiledataencrypter.encrypters
+package com.lokile.dataencrypter.encrypters
 
 import java.nio.ByteBuffer
 

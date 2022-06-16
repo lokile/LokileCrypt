@@ -1,9 +1,7 @@
-package com.lokile.lokiledataencrypter.secretKeyProviders.imp
+package com.lokile.dataencrypter.secretKeyProviders.imp
 
 import android.content.Context
-import android.os.Build
 import android.util.Base64
-import androidx.annotation.RequiresApi
 import androidx.core.content.edit
 import java.math.BigInteger
 import java.security.Key

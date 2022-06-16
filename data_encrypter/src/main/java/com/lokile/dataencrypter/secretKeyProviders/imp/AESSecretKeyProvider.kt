@@ -1,4 +1,4 @@
-package com.lokile.lokiledataencrypter.secretKeyProviders.imp
+package com.lokile.dataencrypter.secretKeyProviders.imp
 
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec

@@ -1,12 +1,12 @@
-package com.lokile.lokiledataencrypter
+package com.lokile.dataencrypter
 
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.lokile.lokiledataencrypter.secretKeyProviders.ISecretKeyProvider
-import com.lokile.lokiledataencrypter.secretKeyProviders.imp.AESSecretKeyProvider
-import com.lokile.lokiledataencrypter.secretKeyProviders.imp.PasswordSecretKeyProvider
-import com.lokile.lokiledataencrypter.secretKeyProviders.imp.RSASecretKeyProvider
+import com.lokile.dataencrypter.secretKeyProviders.ISecretKeyProvider
+import com.lokile.dataencrypter.secretKeyProviders.imp.AESSecretKeyProvider
+import com.lokile.dataencrypter.secretKeyProviders.imp.PasswordSecretKeyProvider
+import com.lokile.dataencrypter.secretKeyProviders.imp.RSASecretKeyProvider
 import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Test

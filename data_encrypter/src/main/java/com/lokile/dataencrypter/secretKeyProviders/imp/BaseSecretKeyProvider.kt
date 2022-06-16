@@ -1,7 +1,6 @@
-package com.lokile.lokiledataencrypter.secretKeyProviders.imp
+package com.lokile.dataencrypter.secretKeyProviders.imp
 
-import android.security.keystore.KeyProperties
-import com.lokile.lokiledataencrypter.secretKeyProviders.ISecretKeyProvider
+import com.lokile.dataencrypter.secretKeyProviders.ISecretKeyProvider
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey

@@ -1,4 +1,4 @@
-package com.lokile.lokiledataencrypter.secretKeyProviders
+package com.lokile.dataencrypter.secretKeyProviders
 
 import java.security.Key
 

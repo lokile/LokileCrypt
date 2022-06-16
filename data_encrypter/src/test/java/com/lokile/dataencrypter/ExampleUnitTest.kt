@@ -1,4 +1,4 @@
-package com.lokile.lokiledataencrypter
+package com.lokile.dataencrypter
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

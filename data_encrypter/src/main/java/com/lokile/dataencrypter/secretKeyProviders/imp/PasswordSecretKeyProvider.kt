@@ -1,4 +1,4 @@
-package com.lokile.lokiledataencrypter.secretKeyProviders.imp
+package com.lokile.dataencrypter.secretKeyProviders.imp
 
 import android.content.Context
 import java.io.File
