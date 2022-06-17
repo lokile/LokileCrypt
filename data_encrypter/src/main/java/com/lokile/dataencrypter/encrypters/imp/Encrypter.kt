@@ -38,6 +38,9 @@ class Encrypter : BaseEncrypter {
     }
 
     override fun decrypt(data: ByteArray): ByteArray? {
+        if (data.isEmpty()) {
+            return null
+        }
         val ivSize = data[0].toInt()
         return decrypt(
             EncryptedData(
