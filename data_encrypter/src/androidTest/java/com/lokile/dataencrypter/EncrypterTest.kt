@@ -31,16 +31,16 @@ class EncrypterTest {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             encrypters.add(
-                Encrypter(AESSecretKeyProvider("p1"))
+                Encrypter(appContext, AESSecretKeyProvider("p1"), false)
             )
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             encrypters.add(
-                Encrypter(RSASecretKeyProvider(context = appContext, "p2"))
+                Encrypter(appContext, RSASecretKeyProvider(context = appContext, "p2"), false)
             )
         }
         encrypters.add(
-            Encrypter(PasswordSecretKeyProvider(appContext, "p3", "demoPassword"))
+            Encrypter(appContext, PasswordSecretKeyProvider(appContext, "p3", "demoPassword"), false)
         )
     }
 

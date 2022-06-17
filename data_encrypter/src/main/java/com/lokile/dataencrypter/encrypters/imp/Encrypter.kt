@@ -13,68 +13,30 @@ import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 
-class Encrypter : IEncrypter {
-
-    private var keyProvider: ISecretKeyProvider
-    private val cipher = Cipher.getInstance("AES/CBC/PKCS7PADDING")
-    private lateinit var secretKey: Key
-
-    constructor(
-        keyProvider: ISecretKeyProvider
-    ) {
-        this.keyProvider = keyProvider
-        loadKey()
-    }
+class Encrypter : BaseEncrypter {
 
     constructor(
         context: Context,
-        alias: String
-    ) {
-        this.keyProvider = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            AESSecretKeyProvider(alias)
-        } else {
-            RSASecretKeyProvider(context, alias)
-        }
-        loadKey()
-    }
+        keyProvider: ISecretKeyProvider,
+        useFixedIv: Boolean
+    ) : super(context, keyProvider, useFixedIv)
 
-    private fun loadKey() {
-        secretKey =
-            keyProvider.getSecretKey() ?: throw Exception("Error when loading the secretKey")
-    }
+    constructor(
+        context: Context,
+        alias: String,
+        useFixedIv: Boolean
+    ) : super(context, alias, useFixedIv)
 
     override fun encrypt(data: ByteArray): EncryptedData? {
-        try {
-            if (this.keyProvider.getIv() != null) {
-                cipher.init(
-                    Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(this.keyProvider.getIv())
-                )
-            } else {
-                cipher.init(
-                    Cipher.ENCRYPT_MODE, secretKey
-                )
-            }
-            return EncryptedData(cipher.doFinal(data), cipher.iv)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
-        }
+        return super.encrypt(data)
+    }
+
+    override fun decrypt(data: EncryptedData): ByteArray? {
+        return super.decrypt(data)
     }
 
     override fun encrypt(data: String): String? {
         return encrypt(data.toByteArray())?.toStringData()
-    }
-
-    override fun decrypt(data: EncryptedData): ByteArray? {
-        try {
-            cipher.init(
-                Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(data.iv)
-            )
-            return cipher.doFinal(data.data)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
-        }
     }
 
     override fun decrypt(data: ByteArray): ByteArray? {
@@ -89,10 +51,5 @@ class Encrypter : IEncrypter {
 
     override fun decrypt(data: String): String? {
         return decrypt(Base64.decode(data, Base64.DEFAULT))?.let { String(it) }
-    }
-
-    override fun resetKeys() {
-        keyProvider.removeSecretKey()
-        loadKey()
     }
 }
