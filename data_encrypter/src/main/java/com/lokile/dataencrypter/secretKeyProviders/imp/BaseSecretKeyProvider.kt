@@ -5,10 +5,14 @@ import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
-internal abstract class BaseSecretKeyProvider(val alias: String) : ISecretKeyProvider {
+internal abstract class BaseSecretKeyProvider(val privateAlias: String) : ISecretKeyProvider {
     protected val KEY_SIZE = 256
     protected val AES_ALGORITHM = "AES"
     protected val KEY_STORE_NAME = "AndroidKeyStore"
+
+    override fun getAlias(): String {
+        return privateAlias
+    }
 
     protected fun createNewAesKey(): SecretKey {
         return KeyGenerator.getInstance(AES_ALGORITHM)
@@ -24,8 +28,8 @@ internal abstract class BaseSecretKeyProvider(val alias: String) : ISecretKeyPro
     protected fun removeKeyStoreAlias(): Boolean {
         try {
             val keyStore = getKeyStore()
-            if (keyStore.containsAlias(alias)) {
-                keyStore.deleteEntry(alias)
+            if (keyStore.containsAlias(privateAlias)) {
+                keyStore.deleteEntry(privateAlias)
                 return true
             }
         } catch (e: Exception) {

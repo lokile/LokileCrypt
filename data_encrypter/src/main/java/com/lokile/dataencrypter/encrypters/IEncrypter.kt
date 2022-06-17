@@ -18,8 +18,8 @@ data class EncryptedData(val data: ByteArray, val iv: ByteArray) {
 }
 
 interface IEncrypter {
-    fun encrypt(data: ByteArray): EncryptedData?
-    fun encrypt(data: String): String?
+    fun encrypt(data: ByteArray, useFixedIv: Boolean = false): EncryptedData?
+    fun encrypt(data: String, useFixedIv: Boolean = false): String?
 
     fun decrypt(data: EncryptedData): ByteArray?
     fun decrypt(data: ByteArray): ByteArray?

@@ -21,7 +21,7 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
 
     private fun wrapAesKey(key: Key): ByteArray {
         val keyStore = getKeyStore()
-        val entry = keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry
+        val entry = keyStore.getEntry(privateAlias, null) as KeyStore.PrivateKeyEntry
         val cipher = Cipher.getInstance(RSA_MODE)
         cipher.init(Cipher.WRAP_MODE, entry.certificate.publicKey)
         return cipher.wrap(key)
@@ -32,7 +32,7 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
         val cipher = Cipher.getInstance(RSA_MODE)
         cipher.init(
             Cipher.UNWRAP_MODE,
-            (keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry).privateKey
+            (keyStore.getEntry(privateAlias, null) as KeyStore.PrivateKeyEntry).privateKey
         )
         return cipher.unwrap(key, AES_ALGORITHM, Cipher.SECRET_KEY)
     }
@@ -62,7 +62,7 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
     override fun getSecretKey(): Key? {
         synchronized(this) {
             val keyStore = getKeyStore()
-            if (keyStore.containsAlias(alias)) {
+            if (keyStore.containsAlias(privateAlias)) {
                 try {
                     return getAesKey()
                 } catch (e: Exception) {
@@ -77,8 +77,8 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
                 val end = Calendar.getInstance()
                 end.add(Calendar.YEAR, 60)
                 val spec = android.security.KeyPairGeneratorSpec.Builder(app)
-                    .setAlias(alias)
-                    .setSubject(X500Principal("CN=$alias"))
+                    .setAlias(privateAlias)
+                    .setSubject(X500Principal("CN=$privateAlias"))
                     .setSerialNumber(BigInteger.TEN)
                     .setStartDate(start.time)
                     .setEndDate(end.time)

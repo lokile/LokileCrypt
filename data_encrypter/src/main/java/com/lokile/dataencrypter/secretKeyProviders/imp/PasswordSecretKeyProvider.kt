@@ -53,11 +53,11 @@ internal class PasswordSecretKeyProvider(context: Context, alias: String, val pa
     override fun getSecretKey(): Key? {
         synchronized(this) {
             val keyStore = getCustomKeyStore() ?: return null
-            if (keyStore.containsAlias(alias)) {
+            if (keyStore.containsAlias(privateAlias)) {
                 try {
                     val entry = keyStore.getEntry(
-                        alias,
-                        KeyStore.PasswordProtection(alias.toCharArray())
+                        privateAlias,
+                        KeyStore.PasswordProtection(privateAlias.toCharArray())
                     ) as KeyStore.SecretKeyEntry
 
                     return entry.secretKey
@@ -69,9 +69,9 @@ internal class PasswordSecretKeyProvider(context: Context, alias: String, val pa
             try {
                 val entry = KeyStore.SecretKeyEntry(createNewAesKey())
                 keyStore.setEntry(
-                    alias,
+                    privateAlias,
                     entry,
-                    KeyStore.PasswordProtection(alias.toCharArray())
+                    KeyStore.PasswordProtection(privateAlias.toCharArray())
                 )
                 saveKeyStore(keyStore)
                 return entry.secretKey
@@ -86,8 +86,8 @@ internal class PasswordSecretKeyProvider(context: Context, alias: String, val pa
         synchronized(this) {
             try {
                 val keyStore = getCustomKeyStore() ?: return false
-                if (keyStore.containsAlias(alias)) {
-                    keyStore.deleteEntry(alias)
+                if (keyStore.containsAlias(privateAlias)) {
+                    keyStore.deleteEntry(privateAlias)
                     saveKeyStore(keyStore)
                     return true
                 }

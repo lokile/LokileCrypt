@@ -18,25 +18,23 @@ class Encrypter : BaseEncrypter {
     constructor(
         context: Context,
         keyProvider: ISecretKeyProvider,
-        useFixedIv: Boolean
-    ) : super(context, keyProvider, useFixedIv)
+    ) : super(context, keyProvider)
 
     constructor(
         context: Context,
         alias: String,
-        useFixedIv: Boolean
-    ) : super(context, alias, useFixedIv)
+    ) : super(context, alias)
 
-    override fun encrypt(data: ByteArray): EncryptedData? {
-        return super.encrypt(data)
+    override fun encrypt(data: ByteArray, useFixedIv: Boolean): EncryptedData? {
+        return super.encrypt(data, useFixedIv)
     }
 
     override fun decrypt(data: EncryptedData): ByteArray? {
         return super.decrypt(data)
     }
 
-    override fun encrypt(data: String): String? {
-        return encrypt(data.toByteArray())?.toStringData()
+    override fun encrypt(data: String, useFixedIv: Boolean): String? {
+        return encrypt(data.toByteArray(), useFixedIv)?.toStringData()
     }
 
     override fun decrypt(data: ByteArray): ByteArray? {

@@ -31,32 +31,73 @@ class EncrypterTest {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             encrypters.add(
-                Encrypter(appContext, AESSecretKeyProvider("p1"), false)
+                Encrypter(appContext, AESSecretKeyProvider("p1"))
             )
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             encrypters.add(
-                Encrypter(appContext, RSASecretKeyProvider(context = appContext, "p2"), false)
+                Encrypter(appContext, RSASecretKeyProvider(context = appContext, "p2"))
             )
         }
         encrypters.add(
-            Encrypter(appContext, PasswordSecretKeyProvider(appContext, "p3", "demoPassword"), false)
+            Encrypter(
+                appContext,
+                PasswordSecretKeyProvider(appContext, "p3", "demoPassword")
+            )
         )
     }
 
     @Test
-    fun testEncryptersInString() {
-        encrypters.forEach {encrypter->
+    fun testEncryptersInStringWithFixedIv() {
+        encrypters.forEach { encrypter ->
+            val source = "DemoText"
+            val encrypted1 = encrypter.encrypt(source, true)
+            assertNotNull(encrypted1)
+            val decrypted1 = encrypter.decrypt(encrypted1!!)
+            assertEquals(decrypted1, source)
+            assertEquals(encrypter.encrypt(source, true), encrypted1)
+        }
+    }
+
+    @Test
+    fun testEncryptersInStringWithRandomIv() {
+        encrypters.forEach { encrypter ->
             val source = "DemoText"
             val encrypted1 = encrypter.encrypt(source)
             assertNotNull(encrypted1)
             val decrypted1 = encrypter.decrypt(encrypted1!!)
             assertEquals(decrypted1, source)
+            assertNotEquals(encrypter.encrypt(source), encrypted1)
         }
     }
 
     @Test
-    fun testEncryptersInByte() {
+    fun testEncryptersInByteWithFixedIv() {
+        encrypters.forEach {
+            val source = "DemoText"
+            val encrypted1 = it.encrypt(source.toByteArray(), true)
+            assertNotNull(encrypted1)
+            val decrypted1 = it.decrypt(encrypted1!!)
+            val decrypted2 = it.decrypt(encrypted1.toByteArray())
+
+            assertNotNull(decrypted1)
+            assertNotNull(decrypted2)
+
+            assertTrue(decrypted1.contentEquals(decrypted2))
+            assertEquals(source, String(decrypted1!!))
+            assertEquals(source, String(decrypted2!!))
+
+            assertEquals(
+                it.encrypt(source.toByteArray(), true)?.toStringData()!!,
+                encrypted1.toStringData()
+            )
+        }
+    }
+
+
+
+    @Test
+    fun testEncryptersInByteWithRandomIv() {
         encrypters.forEach {
             val source = "DemoText"
             val encrypted1 = it.encrypt(source.toByteArray())
@@ -70,10 +111,16 @@ class EncrypterTest {
             assertTrue(decrypted1.contentEquals(decrypted2))
             assertEquals(source, String(decrypted1!!))
             assertEquals(source, String(decrypted2!!))
+
+            assertNotEquals(
+                it.encrypt(source.toByteArray())?.toStringData()!!,
+                encrypted1.toStringData()
+            )
         }
     }
+
     @Test
-    fun testResetKey() {
+    fun testResetKeyWith() {
         encrypters.forEach { encrypter ->
             val source = "DemoText"
             val encrypted = encrypter.encrypt(source)
@@ -83,7 +130,6 @@ class EncrypterTest {
             assertNotNull(decrypted)
 
             assertEquals(source, decrypted)
-            assertNotEquals(encrypter.encrypt(source), encrypted)
 
             encrypter.resetKeys()
             val decrypted2 = encrypter.decrypt(encrypted)

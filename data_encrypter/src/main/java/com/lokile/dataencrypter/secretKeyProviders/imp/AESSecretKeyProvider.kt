@@ -16,12 +16,12 @@ internal class AESSecretKeyProvider(alias: String) :
         synchronized(this) {
             try {
                 val keyStore = getKeyStore()
-                if (keyStore.containsAlias(alias)) {
+                if (keyStore.containsAlias(privateAlias)) {
                     try {
-                        return keyStore.getKey(alias, null) as SecretKey
+                        return keyStore.getKey(privateAlias, null) as SecretKey
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        keyStore.deleteEntry(alias)
+                        keyStore.deleteEntry(privateAlias)
                     }
                 }
                 return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEY_STORE_NAME)
@@ -29,7 +29,7 @@ internal class AESSecretKeyProvider(alias: String) :
                         init(
                             KeyGenParameterSpec
                                 .Builder(
-                                    alias,
+                                    privateAlias,
                                     KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
                                 )
                                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
