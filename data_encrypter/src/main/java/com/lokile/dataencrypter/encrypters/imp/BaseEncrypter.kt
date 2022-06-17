@@ -59,7 +59,7 @@ abstract class BaseEncrypter : IEncrypter {
         val pref = app.getSharedPreferences(prefName, Context.MODE_PRIVATE)
         val encryptedIv = pref.getString(ivKey + keyProvider.getAlias(), null)
         if (encryptedIv != null) {
-            return decrypt(encryptedIv)?.toByteArray().apply {
+            return decrypt(Base64.decode(encryptedIv, Base64.DEFAULT)).apply {
                 if (this == null) {
                     pref.edit {
                         remove(ivKey + keyProvider.getAlias())

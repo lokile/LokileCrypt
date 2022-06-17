@@ -95,7 +95,6 @@ class EncrypterTest {
     }
 
 
-
     @Test
     fun testEncryptersInByteWithRandomIv() {
         encrypters.forEach {
@@ -116,6 +115,28 @@ class EncrypterTest {
                 it.encrypt(source.toByteArray())?.toStringData()!!,
                 encrypted1.toStringData()
             )
+        }
+    }
+
+    @Test
+    fun testFixedIv() {
+        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        var encrypter: Encrypter? = null
+        var testValue = "testValue"
+        try {
+            encrypter = Encrypter(appContext, "testAlias")
+            val encrypted1 = encrypter.encrypt(testValue, true)
+            val encrypted11 = encrypter.encrypt(testValue, true)
+
+            encrypter = Encrypter(appContext, "testAlias")
+            val encrypted2 = encrypter.encrypt(testValue, true)
+            val encrypted21 = encrypter.encrypt(testValue, true)
+
+            assertEquals(encrypted1, encrypted11)
+            assertEquals(encrypted2, encrypted21)
+            assertEquals(encrypted1, encrypted2)
+        } finally {
+            encrypter?.resetKeys()
         }
     }
 
