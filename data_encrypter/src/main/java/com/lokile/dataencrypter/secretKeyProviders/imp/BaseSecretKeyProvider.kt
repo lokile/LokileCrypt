@@ -33,4 +33,8 @@ internal abstract class BaseSecretKeyProvider(val alias: String) : ISecretKeyPro
         }
         return false
     }
+
+    override fun getIv(): ByteArray? {
+        return null
+    }
 }

@@ -45,25 +45,48 @@ class EncrypterTest {
     }
 
     @Test
-    fun testEncrypters() {
+    fun testEncryptersInString() {
+        encrypters.forEach {encrypter->
+            val source = "DemoText"
+            val encrypted1 = encrypter.encrypt(source)
+            assertNotNull(encrypted1)
+            val decrypted1 = encrypter.decrypt(encrypted1!!)
+            assertEquals(decrypted1, source)
+        }
+    }
+
+    @Test
+    fun testEncryptersInByte() {
+        encrypters.forEach {
+            val source = "DemoText"
+            val encrypted1 = it.encrypt(source.toByteArray())
+            assertNotNull(encrypted1)
+            val decrypted1 = it.decrypt(encrypted1!!)
+            val decrypted2 = it.decrypt(encrypted1.toByteArray())
+
+            assertNotNull(decrypted1)
+            assertNotNull(decrypted2)
+
+            assertTrue(decrypted1.contentEquals(decrypted2))
+            assertEquals(source, String(decrypted1!!))
+            assertEquals(source, String(decrypted2!!))
+        }
+    }
+    @Test
+    fun testResetKey() {
         encrypters.forEach { encrypter ->
             val source = "DemoText"
-            val encrypted = encrypter.encrypt(source.toByteArray())
+            val encrypted = encrypter.encrypt(source)
             assertNotNull(encrypted)
 
             val decrypted = encrypter.decrypt(encrypted!!)
             assertNotNull(decrypted)
 
-            assertEquals(source, String(decrypted!!))
-            assertFalse(
-                encrypter.encrypt(source.toByteArray())!!.toByteArray().contentEquals(
-                    encrypted.toByteArray()
-                )
-            )
+            assertEquals(source, decrypted)
+            assertNotEquals(encrypter.encrypt(source), encrypted)
 
             encrypter.resetKeys()
             val decrypted2 = encrypter.decrypt(encrypted)
-
             assertNull(decrypted2)
         }
     }

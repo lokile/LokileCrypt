@@ -43,11 +43,11 @@ class Encrypter : IEncrypter {
             keyProvider.getSecretKey() ?: throw Exception("Error when loading the secretKey")
     }
 
-    override fun encrypt(data: ByteArray, iv: ByteArray?): EncryptedData? {
+    override fun encrypt(data: ByteArray): EncryptedData? {
         try {
-            if (iv != null) {
+            if (this.keyProvider.getIv() != null) {
                 cipher.init(
-                    Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(iv)
+                    Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(this.keyProvider.getIv())
                 )
             } else {
                 cipher.init(
@@ -61,8 +61,8 @@ class Encrypter : IEncrypter {
         }
     }
 
-    override fun encryptToString(data: String, iv: ByteArray?): String? {
-        return encrypt(data.toByteArray(), iv)?.toStringData()
+    override fun encrypt(data: String): String? {
+        return encrypt(data.toByteArray())?.toStringData()
     }
 
     override fun decrypt(data: EncryptedData): ByteArray? {
@@ -87,7 +87,7 @@ class Encrypter : IEncrypter {
         )
     }
 
-    override fun decryptToString(data: String): String? {
+    override fun decrypt(data: String): String? {
         return decrypt(Base64.decode(data, Base64.DEFAULT))?.let { String(it) }
     }
 

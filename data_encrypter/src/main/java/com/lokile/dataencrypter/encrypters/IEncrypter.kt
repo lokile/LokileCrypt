@@ -18,12 +18,11 @@ data class EncryptedData(val data: ByteArray, val iv: ByteArray) {
 }
 
 interface IEncrypter {
-    fun encrypt(data: ByteArray, iv: ByteArray? = null): EncryptedData?
-    fun encryptToString(data: String, iv: ByteArray? = null): String?
+    fun encrypt(data: ByteArray): EncryptedData?
+    fun encrypt(data: String): String?
 
     fun decrypt(data: EncryptedData): ByteArray?
     fun decrypt(data: ByteArray): ByteArray?
-
-    fun decryptToString(data: String): String?
+    fun decrypt(data: String): String?
     fun resetKeys()
 }
