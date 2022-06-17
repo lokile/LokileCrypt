@@ -18,7 +18,7 @@ abstract class BaseEncrypter : IEncrypter {
     protected val cipher = Cipher.getInstance("AES/CBC/PKCS7PADDING")
     protected var keyProvider: ISecretKeyProvider
     protected var app: Context
-    protected var iv: ByteArray? = null
+    protected var fixedIv: ByteArray? = null
     protected lateinit var secretKey: Key
     private val prefName = "xfhw9LYsjwSaR4cfAakQhVFn1"
     private val ivKey = "352VZrcCFprRHWZ8cg9DvytRb"
@@ -35,6 +35,18 @@ abstract class BaseEncrypter : IEncrypter {
         loadKey()
     }
 
+    protected fun initCipher(mode: Int, iv: ByteArray? = null) {
+        if (iv != null) {
+            cipher.init(
+                mode, secretKey, IvParameterSpec(iv)
+            )
+        } else {
+            cipher.init(
+                mode, secretKey
+            )
+        }
+    }
+
     protected fun loadDefaultKeyProvider(alias: String): ISecretKeyProvider {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             AESSecretKeyProvider(alias)
@@ -48,14 +60,39 @@ abstract class BaseEncrypter : IEncrypter {
             keyProvider.getSecretKey() ?: throw Exception("Error when loading the secretKey")
     }
 
-    private fun saveIv(iv: ByteArray) {
+    protected fun saveFixedIv(iv: ByteArray, useFixedIv: Boolean) {
+        if (this.keyProvider.getIv() != null || !useFixedIv || this.fixedIv != null) {
+            return
+        }
+        this.fixedIv = iv
+        initCipher(Cipher.ENCRYPT_MODE)
+        val ivData = cipher.doFinal(iv)
+        val ivIv = cipher.iv
         app.getSharedPreferences(prefName, Context.MODE_PRIVATE)
             .edit {
-                putString(ivKey + keyProvider.getAlias(), Base64.encodeToString(iv, Base64.DEFAULT))
+                putString(
+                    ivKey + keyProvider.getAlias(),
+                    Base64.encodeToString(
+                        ByteBuffer.allocate(ivIv.size + ivData.size + 1)
+                            .apply {
+                                put(ivIv.size.toByte())
+                                put(ivIv)
+                                put(ivData)
+                            }.array(), Base64.DEFAULT
+                    )
+                )
             }
     }
 
-    private fun loadIv(): ByteArray? {
+    protected fun loadFixedIv(useFixedIv: Boolean): ByteArray? {
+        val encryptIv = this.keyProvider.getIv()
+        if (encryptIv != null || !useFixedIv) {
+            return encryptIv
+        }
+        if (this.fixedIv != null) {
+            return this.fixedIv
+        }
+
         val pref = app.getSharedPreferences(prefName, Context.MODE_PRIVATE)
         val encryptedIv = pref.getString(ivKey + keyProvider.getAlias(), null)
         if (encryptedIv != null) {
@@ -73,39 +110,12 @@ abstract class BaseEncrypter : IEncrypter {
 
     override fun encrypt(data: ByteArray, useFixedIv: Boolean): EncryptedData? {
         try {
-            var encryptIv = this.keyProvider.getIv()
-            if (encryptIv == null && useFixedIv) {
-                if (iv == null) {
-                    iv = loadIv()
-                }
-                encryptIv = iv
-            }
-            if (encryptIv != null) {
-                cipher.init(
-                    Cipher.ENCRYPT_MODE, secretKey, IvParameterSpec(encryptIv)
-                )
-            } else {
-                cipher.init(
-                    Cipher.ENCRYPT_MODE, secretKey
-                )
-            }
+            initCipher(Cipher.ENCRYPT_MODE, loadFixedIv(useFixedIv))
+
             val output = cipher.doFinal(data)
             val iv = cipher.iv
 
-            if (keyProvider.getIv() == null && useFixedIv && this.iv == null) {
-                this.iv = iv
-                cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-                val ivData = cipher.doFinal(iv)
-                val ivIv = cipher.iv
-                saveIv(
-                    ByteBuffer.allocate(ivIv.size + ivData.size + 1)
-                        .apply {
-                            put(ivIv.size.toByte())
-                            put(ivIv)
-                            put(ivData)
-                        }.array()
-                )
-            }
+            saveFixedIv(iv, useFixedIv)
             return EncryptedData(output, iv)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -115,9 +125,7 @@ abstract class BaseEncrypter : IEncrypter {
 
     override fun decrypt(data: EncryptedData): ByteArray? {
         try {
-            cipher.init(
-                Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(data.iv)
-            )
+            initCipher(Cipher.DECRYPT_MODE, data.iv)
             return cipher.doFinal(data.data)
         } catch (e: Exception) {
             e.printStackTrace()
