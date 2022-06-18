@@ -29,7 +29,7 @@ Then, add the dependency to your app build.gradle file, the latest version is: [
 
 ## Usage:
 ### Create the object:
-Just create the Encrypter object and use it to encrypt/decrypt your data:
+- Just create the Encrypter object and use it to encrypt/decrypt your data, it will generate a new secret key for the new alias and store in Android KeyStore system.
 ```
 import com.lokile.dataencrypter.encrypters.imp.Encrypter
 ......
@@ -37,14 +37,36 @@ var encrypter: Encrypter
 try {
   encrypter = Encrypter(
     context=context,
-    alias="your_alias" // it's a keyword to save/load the secret key in keystore
+    alias="your_alias", // it's a keyword to save/load the secret key in keystore,
+    //algorithm="your_encryption_algorithm" //default value is "AES/CBC/PKCS7PADDING"
   )
 } catch(e: Exception) {
   Log.e(TAG, "Failed to create the Encrypter", e)
 }
 ```
+- You can provide your secret key to encrypt/decrypt your data. So that you can transfer/receive the encrypted data from outside of your app, and the receiver can decrypt the data with your provided secret key. 
+```
+try {
+    encrypter = Encrypter(
+        context = appContext,
+        keyProvider = object : SecretKeyProvider() {
+            override fun getSecretKey(): Key? {
+                TODO("Not yet implemented")
+            }
+
+            override fun getIv(): ByteArray? {
+              //return null if you want to use randomize iv
+              return null
+            }
+        },
+        //algorithm="your_encryption_algorithm" //default value is "AES/CBC/PKCS7PADDING"
+    )
+} catch (e: Exception) {
+    Log.e(TAG, "Failed to create the Encrypter", e)
+}
+```
 ### Encryption
-To encrypt the data:
+- To encrypt the data:
 (the library will generate a new randomized IV key when performing encryption, 
 so the encrypted results are not the same for the same input)
 ```
@@ -52,11 +74,29 @@ val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encrypt(toBeEncrypted)
 val result2:String? = encrypter.encrypt(toBeEncrypted) // result1 != result2
 ```
-If we expected that the encrypted data should be the same in the above case. We can update the code as the following:
+- If you expected that the encrypted data should be the same in the above case. You can update the code as the following:
 ```
 val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false)
 val result2:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false) // result1 == result2
 ```
+- The above function merges the IV key and the encrypted data into single output String, if you want to separate these data, you can update the code as the following:
+```
+val result1:EncryptedData? = encrypter.encrypt(toBeEncrypted.toByteArray())
+//result1.data
+//result1.iv
+//result1.toStringData() //to merge the data and iv to a single String
+//result1.toByteArray()  //to merge the data and iv to a single ByteArray
+```
+
 ### Decryption
 
+```
+//encrypted1 is a ByteArray or EncryptedData
+val decrypted1:ByteArray? = encrypter.decrypt(encrypted1)
+// if the original data is string, you can convert the decrypted1 to string:
+// val decrypted1Str = String(decrypted1) 
+
+//encrypted2 is a String
+val decrypted2:String? = encrypter.decrypt(encrypted2)
+```
