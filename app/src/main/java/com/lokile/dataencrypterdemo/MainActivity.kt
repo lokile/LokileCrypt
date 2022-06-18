@@ -3,7 +3,7 @@ package com.lokile.dataencrypterdemo
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.lokile.dataencrypter.encrypters.imp.Encrypter
+import com.lokile.encrypter.encrypters.imp.Encrypter
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
