@@ -43,13 +43,14 @@ try {
 }
 ```
 To encrypt the data:
+(For more security, the library will generate a new randomized IV key when performing encrypt, 
+so the encrypted results are not the same for the same input)
 ```
 val toBeEncrypted="Hello World!"
 val result1:String = encrypter.encrypt(toBeEncrypted)
 val result2:String = encrypter.encrypt(toBeEncrypted) // result1 != result2
-//For more security, the library will generate a new randomized IV key when performing encrypt, so the result2 will be difference from result1
 ```
-In some cases, we expected that the encrypted data should be the same for the same input. We can update the code as the following:
+If we expected that the encrypted data should be the same for the same input. We can update the code as the following:
 ```
 val toBeEncrypted="Hello World!"
 val result1:String = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false)
