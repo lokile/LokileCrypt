@@ -20,15 +20,15 @@ Add the following code to to your root build.gradle at the end of repositories:
       }
   }
 ```
-Then, add the dependency to your app build.gradle file:
+Then, add the dependency to your app build.gradle file, the latest version is: [![](https://jitpack.io/v/lokile/LokileCrypt.svg)](https://jitpack.io/#lokile/LokileCrypt)
 ```
-	dependencies {
-	        implementation 'com.github.lokile:LokileCrypt:latest_version'
-	}
+  dependencies {
+    implementation 'com.github.lokile:LokileCrypt:latest_version'
+  }
 ```
-## latest_version: [![](https://jitpack.io/v/lokile/LokileCrypt.svg)](https://jitpack.io/#lokile/LokileCrypt)
 
 ## Usage:
+The library is easy to use. Just create the Encrypter object and use it to encrypt/decrypt your data:
 ```
 import com.lokile.dataencrypter.encrypters.imp.Encrypter
 ......
@@ -38,8 +38,21 @@ try {
     context=context,
     alias="your_alias" // it's a keyword to save/load the secret key in keystore
   )
-}catch(e: Exception){
+} catch(e: Exception) {
   Log.e(TAG, "Failed to create the Encrypter", e)
 }
+```
+To encrypt the data:
+```
+val toBeEncrypted="Hello World!"
+val result1:String = encrypter.encrypt(toBeEncrypted)
+val result2:String = encrypter.encrypt(toBeEncrypted) // result1 != result2
+//For more security, the library will generate a new randomized IV key when performing encrypt, so the result2 will be difference from result1
+```
+In some cases, we expected that the encrypted data should be the same for the same input. We can update the code as the following:
+```
+val toBeEncrypted="Hello World!"
+val result1:String = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false)
+val result2:String = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false) // result1 == result2
 ```
 
