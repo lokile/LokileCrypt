@@ -50,6 +50,8 @@ try {
     encrypter = Encrypter(
         context = appContext,
         keyProvider = object : SecretKeyProvider() {
+            override fun getAlias() = "Your alias"
+            
             override fun getSecretKey(): Key? {
                 TODO("Not yet implemented")
             }
