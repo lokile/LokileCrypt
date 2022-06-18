@@ -15,18 +15,18 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class SecretKeyProviderTest {
-    lateinit var provider: ISecretKeyProvider
+    var provider: ISecretKeyProvider? = null
 
     @After
     fun tearDown() {
-        provider.removeSecretKey()
+        provider?.removeSecretKey()
     }
 
     @Test
     fun testAesKeyProvider() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             provider = AESSecretKeyProvider("testAesKeyProvider")
-            assertNotNull(provider.getSecretKey())
+            assertNotNull(provider?.getSecretKey())
         }
     }
 
@@ -35,7 +35,7 @@ class SecretKeyProviderTest {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             val appContext = InstrumentationRegistry.getInstrumentation().targetContext
             provider = RSASecretKeyProvider(appContext, "testRsaKeyProvider")
-            assertNotNull(provider.getSecretKey())
+            assertNotNull(provider?.getSecretKey())
         }
     }
 
@@ -43,6 +43,6 @@ class SecretKeyProviderTest {
     fun testPasswordKeyProvider() {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         provider = PasswordSecretKeyProvider(appContext, "testPasswordKeyProvider", "testPasswordKeyProvider")
-        assertNotNull(provider.getSecretKey())
+        assertNotNull(provider?.getSecretKey())
     }
 }
