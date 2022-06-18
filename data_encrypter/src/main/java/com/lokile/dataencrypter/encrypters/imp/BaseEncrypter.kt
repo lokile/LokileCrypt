@@ -60,8 +60,8 @@ abstract class BaseEncrypter : IEncrypter {
             keyProvider.getSecretKey() ?: throw Exception("Error when loading the secretKey")
     }
 
-    protected fun saveFixedIv(iv: ByteArray, useFixedIv: Boolean) {
-        if (this.keyProvider.getIv() != null || !useFixedIv || this.fixedIv != null) {
+    protected fun saveFixedIv(iv: ByteArray, useRandomizeIv: Boolean) {
+        if (this.keyProvider.getIv() != null || useRandomizeIv || this.fixedIv != null) {
             return
         }
         this.fixedIv = iv
@@ -84,9 +84,9 @@ abstract class BaseEncrypter : IEncrypter {
             }
     }
 
-    protected fun loadFixedIv(useFixedIv: Boolean): ByteArray? {
+    protected fun loadFixedIv(useRandomizeIv: Boolean): ByteArray? {
         val encryptIv = this.keyProvider.getIv()
-        if (encryptIv != null || !useFixedIv) {
+        if (encryptIv != null || useRandomizeIv) {
             return encryptIv
         }
         if (this.fixedIv != null) {
@@ -108,14 +108,14 @@ abstract class BaseEncrypter : IEncrypter {
         }
     }
 
-    override fun encrypt(data: ByteArray, useFixedIv: Boolean): EncryptedData? {
+    override fun encrypt(data: ByteArray, useRandomizeIv: Boolean): EncryptedData? {
         try {
-            initCipher(Cipher.ENCRYPT_MODE, loadFixedIv(useFixedIv))
+            initCipher(Cipher.ENCRYPT_MODE, loadFixedIv(useRandomizeIv))
 
             val output = cipher.doFinal(data)
             val iv = cipher.iv
 
-            saveFixedIv(iv, useFixedIv)
+            saveFixedIv(iv, useRandomizeIv)
             return EncryptedData(output, iv)
         } catch (e: Exception) {
             e.printStackTrace()

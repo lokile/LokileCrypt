@@ -51,11 +51,11 @@ class EncrypterTest {
     fun testEncryptersInStringWithFixedIv() {
         encrypters.forEach { encrypter ->
             val source = "DemoText"
-            val encrypted1 = encrypter.encrypt(source, true)
+            val encrypted1 = encrypter.encrypt(source, false)
             assertNotNull(encrypted1)
             val decrypted1 = encrypter.decrypt(encrypted1!!)
             assertEquals(decrypted1, source)
-            assertEquals(encrypter.encrypt(source, true), encrypted1)
+            assertEquals(encrypter.encrypt(source, false), encrypted1)
         }
     }
 
@@ -75,7 +75,7 @@ class EncrypterTest {
     fun testEncryptersInByteWithFixedIv() {
         encrypters.forEach {
             val source = "DemoText"
-            val encrypted1 = it.encrypt(source.toByteArray(), true)
+            val encrypted1 = it.encrypt(source.toByteArray(), false)
             assertNotNull(encrypted1)
             val decrypted1 = it.decrypt(encrypted1!!)
             val decrypted2 = it.decrypt(encrypted1.toByteArray())
@@ -88,7 +88,7 @@ class EncrypterTest {
             assertEquals(source, String(decrypted2!!))
 
             assertEquals(
-                it.encrypt(source.toByteArray(), true)?.toStringData()!!,
+                it.encrypt(source.toByteArray(), false)?.toStringData()!!,
                 encrypted1.toStringData()
             )
         }
@@ -125,12 +125,12 @@ class EncrypterTest {
         var testValue = "testValue"
         try {
             encrypter = Encrypter(appContext, "testAlias")
-            val encrypted1 = encrypter.encrypt(testValue, true)
-            val encrypted11 = encrypter.encrypt(testValue, true)
+            val encrypted1 = encrypter.encrypt(testValue, false)
+            val encrypted11 = encrypter.encrypt(testValue, false)
 
             encrypter = Encrypter(appContext, "testAlias")
-            val encrypted2 = encrypter.encrypt(testValue, true)
-            val encrypted21 = encrypter.encrypt(testValue, true)
+            val encrypted2 = encrypter.encrypt(testValue, false)
+            val encrypted21 = encrypter.encrypt(testValue, false)
 
             assertEquals(encrypted1, encrypted11)
             assertEquals(encrypted2, encrypted21)

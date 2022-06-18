@@ -25,16 +25,16 @@ class Encrypter : BaseEncrypter {
         alias: String,
     ) : super(context, alias)
 
-    override fun encrypt(data: ByteArray, useFixedIv: Boolean): EncryptedData? {
-        return super.encrypt(data, useFixedIv)
+    override fun encrypt(data: ByteArray, useRandomizeIv: Boolean): EncryptedData? {
+        return super.encrypt(data, useRandomizeIv)
     }
 
     override fun decrypt(data: EncryptedData): ByteArray? {
         return super.decrypt(data)
     }
 
-    override fun encrypt(data: String, useFixedIv: Boolean): String? {
-        return encrypt(data.toByteArray(), useFixedIv)?.toStringData()
+    override fun encrypt(data: String, useRandomizeIv: Boolean): String? {
+        return encrypt(data.toByteArray(), useRandomizeIv)?.toStringData()
     }
 
     override fun decrypt(data: ByteArray): ByteArray? {
