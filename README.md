@@ -66,7 +66,7 @@ try {
 }
 ```
 ### Encryption
-- The library will generate a new randomized IV key when performing encryption, 
+- The following code will encrypt the data, the library will generate a new randomized IV key when performing encryption, 
 so the encrypted results are not the same for the same input
 ```
 val toBeEncrypted="Hello World!"
