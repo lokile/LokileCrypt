@@ -69,20 +69,22 @@ try {
 }
 ```
 ### Encryption
-- The following code will encrypt the data, the library will generate a new randomized IV key when performing encryption, 
-so the encrypted results are not the same for the same input
+- Following is the simple way to perform encryption with randomized IV key:
 ```
 val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encrypt(toBeEncrypted)
 val result2:String? = encrypter.encrypt(toBeEncrypted) // result1 != result2
+
+/* The library will generate a new randomized IV key when performing encryption,
+so the encrypted results are not the same for the same input*/
 ```
-- To make the encrypted data are the same for the same input:
+- To make the encrypted data are the same for the same input (NOT randomized IV key):
 ```
 val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false)
 val result2:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false) // result1 == result2
 ```
-- The above functions merges the IV key and the encrypted data into single output String, use the following code to separate these data:
+- The above functions merges the IV key and the encrypted data into single output String, use the following code instead to separate these data:
 ```
 val result1:EncryptedData? = encrypter.encrypt(toBeEncrypted.toByteArray())
 //result1.data
@@ -109,4 +111,3 @@ MIT is the project license so feel free to use it :tada:
 ## Want to contribute? ##
 
 Fell free to contribute, I really like pull requests :octocat:
-
