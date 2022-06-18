@@ -102,3 +102,11 @@ val decrypted1:ByteArray? = encrypter.decrypt(encrypted1)
 //the type of encrypted2 below is String
 val decrypted2:String? = encrypter.decrypt(encrypted2)
 ```
+
+## License:
+MIT is the project license so feel free to use it :tada:
+
+## Want to contribute? ##
+
+Fell free to contribute, I really like pull requests :octocat:
+
