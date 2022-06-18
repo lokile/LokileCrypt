@@ -47,13 +47,13 @@ To encrypt the data:
 so the encrypted results are not the same for the same input)
 ```
 val toBeEncrypted="Hello World!"
-val result1:String = encrypter.encrypt(toBeEncrypted)
-val result2:String = encrypter.encrypt(toBeEncrypted) // result1 != result2
+val result1:String? = encrypter.encrypt(toBeEncrypted)
+val result2:String? = encrypter.encrypt(toBeEncrypted) // result1 != result2
 ```
 If we expected that the encrypted data should be the same for the same input. We can update the code as the following:
 ```
 val toBeEncrypted="Hello World!"
-val result1:String = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false)
-val result2:String = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false) // result1 == result2
+val result1:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false)
+val result2:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false) // result1 == result2
 ```
 
