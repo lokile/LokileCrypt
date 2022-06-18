@@ -28,7 +28,8 @@ Then, add the dependency to your app build.gradle file, the latest version is: [
 ```
 
 ## Usage:
-The library is easy to use. Just create the Encrypter object and use it to encrypt/decrypt your data:
+### Create the object:
+Just create the Encrypter object and use it to encrypt/decrypt your data:
 ```
 import com.lokile.dataencrypter.encrypters.imp.Encrypter
 ......
@@ -42,6 +43,7 @@ try {
   Log.e(TAG, "Failed to create the Encrypter", e)
 }
 ```
+### Encryption
 To encrypt the data:
 (For more security, the library will generate a new randomized IV key when performing encrypt, 
 so the encrypted results are not the same for the same input)
@@ -56,4 +58,5 @@ val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false)
 val result2:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false) // result1 == result2
 ```
+### Decryption
 
