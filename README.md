@@ -44,7 +44,7 @@ try {
   Log.e(TAG, "Failed to create the Encrypter", e)
 }
 ```
-- You can provide your secret key to encrypt/decrypt your data. So that you can transfer/receive the encrypted data from outside of your app, and the receiver can decrypt the data with your provided secret key. 
+- You can provide your secret key to encrypt/decrypt your data:
 ```
 try {
     encrypter = Encrypter(
