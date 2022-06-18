@@ -76,13 +76,13 @@ val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encrypt(toBeEncrypted)
 val result2:String? = encrypter.encrypt(toBeEncrypted) // result1 != result2
 ```
-- If you expected that the encrypted data should be the same in the above case. You can update the code as the following:
+- To make the encrypted data are the same for the same input:
 ```
 val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false)
 val result2:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false) // result1 == result2
 ```
-- The above function merges the IV key and the encrypted data into single output String, if you want to separate these data, you can update the code as the following:
+- The above functions merges the IV key and the encrypted data into single output String, use the following code to separate these data:
 ```
 val result1:EncryptedData? = encrypter.encrypt(toBeEncrypted.toByteArray())
 //result1.data
