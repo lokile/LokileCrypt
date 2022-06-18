@@ -95,7 +95,7 @@ val result1:EncryptedData? = encrypter.encrypt(toBeEncrypted.toByteArray())
 ```
 //encrypted1 is a ByteArray or EncryptedData
 val decrypted1:ByteArray? = encrypter.decrypt(encrypted1)
-// if the original data is string, you can convert the decrypted1 to string:
+// you can convert the decrypted1 to string:
 // val decrypted1Str = String(decrypted1) 
 
 //encrypted2 is a String
