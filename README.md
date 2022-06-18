@@ -66,9 +66,8 @@ try {
 }
 ```
 ### Encryption
-- To encrypt the data:
-(the library will generate a new randomized IV key when performing encryption, 
-so the encrypted results are not the same for the same input)
+- The library will generate a new randomized IV key when performing encryption, 
+so the encrypted results are not the same for the same input
 ```
 val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encrypt(toBeEncrypted)
