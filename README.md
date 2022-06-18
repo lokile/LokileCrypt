@@ -3,7 +3,7 @@
 
 
 ## Overview
-This library provides a simple way to encrypt and decrypt data using the AES 256-bit encryption algorithm. The library store the secret key in the Android Keystore which makes it more difficult to extract from the device. This library also allows you to provide your secret key to encrypt/decrypt so that you can transfer the data with your server
+This library provides a simple way to encrypt and decrypt data using the AES 256-bit encryption algorithm. The library store the secret key in the Android Keystore which makes it more difficult to extract from the device. This library also allows you to provide your secret key to encrypt/decrypt so that you can transfer/received the encrypted data to/from outside of the app.
 
 ## Requirements
 - Android API 18 or higher
