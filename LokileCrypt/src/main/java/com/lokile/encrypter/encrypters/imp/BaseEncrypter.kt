@@ -119,27 +119,31 @@ abstract class BaseEncrypter : IEncrypter {
     }
 
     override fun encrypt(data: ByteArray, useRandomizeIv: Boolean): EncryptedData? {
-        try {
-            initCipher(Cipher.ENCRYPT_MODE, loadFixedIv(useRandomizeIv))
+        synchronized(this) {
+            try {
+                initCipher(Cipher.ENCRYPT_MODE, loadFixedIv(useRandomizeIv))
 
-            val output = cipher.doFinal(data)
-            val iv = cipher.iv
+                val output = cipher.doFinal(data)
+                val iv = cipher.iv
 
-            saveFixedIv(iv, useRandomizeIv)
-            return EncryptedData(output, iv)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
+                saveFixedIv(iv, useRandomizeIv)
+                return EncryptedData(output, iv)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return null
+            }
         }
     }
 
     override fun decrypt(data: EncryptedData): ByteArray? {
-        try {
-            initCipher(Cipher.DECRYPT_MODE, data.iv)
-            return cipher.doFinal(data.data)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
+        synchronized(this) {
+            try {
+                initCipher(Cipher.DECRYPT_MODE, data.iv)
+                return cipher.doFinal(data.data)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return null
+            }
         }
     }
 
@@ -154,16 +158,18 @@ abstract class BaseEncrypter : IEncrypter {
     }
 
     override fun resetKeys(): Boolean {
-        try {
-            app.getSharedPreferences(prefName, Context.MODE_PRIVATE).edit {
-                remove(savedIvKeyWord + keyProvider.getAlias())
+        synchronized(this) {
+            try {
+                app.getSharedPreferences(prefName, Context.MODE_PRIVATE).edit {
+                    remove(savedIvKeyWord + keyProvider.getAlias())
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    app.deleteSharedPreferences(prefName)
+                }
+                return keyProvider.removeSecretKey()
+            } finally {
+                loadKey()
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                app.deleteSharedPreferences(prefName)
-            }
-            return keyProvider.removeSecretKey()
-        } finally {
-            loadKey()
         }
     }
 }
