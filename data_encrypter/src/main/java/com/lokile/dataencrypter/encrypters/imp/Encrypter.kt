@@ -1,29 +1,24 @@
 package com.lokile.dataencrypter.encrypters.imp
 
 import android.content.Context
-import android.os.Build
 import android.util.Base64
 import com.lokile.dataencrypter.encrypters.EncryptedData
-import com.lokile.dataencrypter.encrypters.IEncrypter
 import com.lokile.dataencrypter.secretKeyProviders.ISecretKeyProvider
-import com.lokile.dataencrypter.secretKeyProviders.imp.AESSecretKeyProvider
-import com.lokile.dataencrypter.secretKeyProviders.imp.RSASecretKeyProvider
-import java.security.Key
 import java.util.*
-import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
 
 class Encrypter : BaseEncrypter {
 
     constructor(
         context: Context,
         keyProvider: ISecretKeyProvider,
-    ) : super(context, keyProvider)
+        algorithm: String = "AES/CBC/PKCS7PADDING"
+    ) : super(context, keyProvider, algorithm)
 
     constructor(
         context: Context,
         alias: String,
-    ) : super(context, alias)
+        algorithm: String = "AES/CBC/PKCS7PADDING"
+    ) : super(context, alias, algorithm)
 
     override fun encrypt(data: ByteArray, useRandomizeIv: Boolean): EncryptedData? {
         return super.encrypt(data, useRandomizeIv)

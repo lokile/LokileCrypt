@@ -15,23 +15,26 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 
 abstract class BaseEncrypter : IEncrypter {
-    protected val cipher = Cipher.getInstance("AES/CBC/PKCS7PADDING")
+    protected lateinit var algorithm: String
+    protected val cipher by lazy { Cipher.getInstance(algorithm) }
     protected var keyProvider: ISecretKeyProvider
     protected var app: Context
     protected var fixedIv: ByteArray? = null
     protected lateinit var secretKey: Key
     private val prefName = "xfhw9LYsjwSaR4cfAakQhVFn1"
-    private val ivKey = "352VZrcCFprRHWZ8cg9DvytRb"
+    private val savedIvKeyWord = "352VZrcCFprRHWZ8cg9DvytRb"
 
-    constructor(context: Context, keyProvider: ISecretKeyProvider) {
+    constructor(context: Context, keyProvider: ISecretKeyProvider, algorithm: String) {
         app = context.applicationContext
         this.keyProvider = keyProvider
+        this.algorithm = algorithm
         loadKey()
     }
 
-    constructor(context: Context, alias: String) {
+    constructor(context: Context, alias: String, algorithm: String) {
         app = context.applicationContext
         this.keyProvider = loadDefaultKeyProvider(alias)
+        this.algorithm = algorithm
         loadKey()
     }
 
@@ -71,7 +74,7 @@ abstract class BaseEncrypter : IEncrypter {
         app.getSharedPreferences(prefName, Context.MODE_PRIVATE)
             .edit {
                 putString(
-                    ivKey + keyProvider.getAlias(),
+                    savedIvKeyWord + keyProvider.getAlias(),
                     Base64.encodeToString(
                         ByteBuffer.allocate(ivIv.size + ivData.size + 1)
                             .apply {
@@ -94,12 +97,12 @@ abstract class BaseEncrypter : IEncrypter {
         }
 
         val pref = app.getSharedPreferences(prefName, Context.MODE_PRIVATE)
-        val encryptedIv = pref.getString(ivKey + keyProvider.getAlias(), null)
+        val encryptedIv = pref.getString(savedIvKeyWord + keyProvider.getAlias(), null)
         if (encryptedIv != null) {
             return decrypt(Base64.decode(encryptedIv, Base64.DEFAULT)).apply {
                 if (this == null) {
                     pref.edit {
-                        remove(ivKey + keyProvider.getAlias())
+                        remove(savedIvKeyWord + keyProvider.getAlias())
                     }
                 }
             }
@@ -133,11 +136,24 @@ abstract class BaseEncrypter : IEncrypter {
         }
     }
 
+    override fun getEncryptCipher(useRandomizeIv: Boolean): Cipher {
+        initCipher(Cipher.ENCRYPT_MODE, loadFixedIv(useRandomizeIv))
+        return cipher
+    }
+
+    override fun getDecryptCipher(iv: ByteArray): Cipher {
+        initCipher(Cipher.DECRYPT_MODE, iv)
+        return cipher
+    }
+
     override fun resetKeys() {
-        keyProvider.removeSecretKey()
         app.getSharedPreferences(prefName, Context.MODE_PRIVATE).edit {
-            remove(ivKey + keyProvider.getAlias())
+            remove(savedIvKeyWord + keyProvider.getAlias())
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            app.deleteSharedPreferences(prefName)
+        }
+        keyProvider.removeSecretKey()
         loadKey()
     }
 }

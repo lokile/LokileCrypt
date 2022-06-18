@@ -1,6 +1,7 @@
 package com.lokile.dataencrypter.secretKeyProviders.imp
 
 import android.content.Context
+import android.os.Build
 import android.util.Base64
 import androidx.core.content.edit
 import java.math.BigInteger
@@ -101,6 +102,10 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
             try {
                 app.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
                     .edit { remove(prefAlias) }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    app.deleteSharedPreferences(PREF_NAME)
+                }
                 return removeKeyStoreAlias()
             } catch (e: Exception) {
                 e.printStackTrace()

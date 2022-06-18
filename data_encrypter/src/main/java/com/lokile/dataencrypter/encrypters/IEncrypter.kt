@@ -2,7 +2,7 @@ package com.lokile.dataencrypter.encrypters
 
 import android.util.Base64
 import java.nio.ByteBuffer
-import java.util.*
+import javax.crypto.Cipher
 
 data class EncryptedData(val data: ByteArray, val iv: ByteArray) {
     fun toByteArray(): ByteArray {
@@ -24,5 +24,8 @@ interface IEncrypter {
     fun decrypt(data: EncryptedData): ByteArray?
     fun decrypt(data: ByteArray): ByteArray?
     fun decrypt(data: String): String?
+
+    fun getEncryptCipher(useRandomizeIv: Boolean = true): Cipher
+    fun getDecryptCipher(iv: ByteArray): Cipher
     fun resetKeys()
 }
