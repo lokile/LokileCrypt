@@ -6,7 +6,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.lokile.encrypter.encrypters.IEncrypter
 import com.lokile.encrypter.encrypters.imp.Encrypter
-import com.lokile.encrypter.secretKeyProviders.SecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.AESSecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.PasswordSecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.RSASecretKeyProvider
@@ -36,46 +35,33 @@ class EncrypterTest {
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             encrypters.add(
-                Encrypter(appContext, AESSecretKeyProvider("p1"))
+                Encrypter.Builder(appContext, "p1")
+                    .setSecretKeyProvider(AESSecretKeyProvider("p1"))
+                    .build()
             )
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             encrypters.add(
-                Encrypter(appContext, RSASecretKeyProvider(context = appContext, "p2"))
+                Encrypter.Builder(appContext, "p2")
+                    .setSecretKeyProvider(RSASecretKeyProvider(context = appContext, "p2"))
+                    .build()
             )
         }
         encrypters.add(
-            Encrypter(
-                appContext,
-                PasswordSecretKeyProvider(appContext, "p3", "demoPassword")
-            )
+            Encrypter.Builder(appContext, "p3")
+                .setSecretKeyProvider(PasswordSecretKeyProvider(appContext, "p3", "demoPassword"))
+                .build()
         )
         //test custom key
         encrypters.add(
-            Encrypter(
-                appContext,
-                object : SecretKeyProvider() {
-                    val aesKey by lazy {
-                        KeyGenerator.getInstance("AES")
-                            .apply {
-                                init(256)
-                            }.generateKey()
-                    }
-
-                    override fun getAlias(): String {
-                        return "testAlias"
-                    }
-
-                    override fun getSecretKey(): Key? {
-                        return aesKey
-                    }
-
-                    override fun getIv(): ByteArray? {
-                        return null
-                    }
-
-                }
-            )
+            Encrypter.Builder(appContext, "p4")
+                .setSecretKey(
+                    KeyGenerator.getInstance("AES")
+                        .apply {
+                            init(256)
+                        }.generateKey(),
+                    null
+                ).build()
         )
     }
 
@@ -153,7 +139,7 @@ class EncrypterTest {
     @Test
     fun testFixedIv() {
         var encrypter: Encrypter? = null
-        var testValue = "testValue"
+        val testValue = "testValue"
         try {
             encrypter = Encrypter(appContext, "testAlias")
             val encrypted1 = encrypter.encrypt(testValue, false)
@@ -162,6 +148,11 @@ class EncrypterTest {
             encrypter = Encrypter(appContext, "testAlias")
             val encrypted2 = encrypter.encrypt(testValue, false)
             val encrypted21 = encrypter.encrypt(testValue, false)
+
+            assertNotNull(encrypted1)
+            assertNotNull(encrypted11)
+            assertNotNull(encrypted2)
+            assertNotNull(encrypted21)
 
             assertEquals(encrypted1, encrypted11)
             assertEquals(encrypted2, encrypted21)
@@ -174,51 +165,34 @@ class EncrypterTest {
     @Test
     fun testFixedIvWithCustomKeyProvider() {
         val originalData = " Hello world!"
-        val encrypter1 = Encrypter(appContext, object : SecretKeyProvider() {
-            val aesKey by lazy {
+        val encrypter1 = Encrypter
+            .Builder(appContext, "testAlias1")
+            .setSecretKey(
                 KeyGenerator.getInstance("AES")
                     .apply {
                         init(256)
-                    }.generateKey()
-            }
-
-            override fun getAlias() = "testAlias1"
-
-            override fun getSecretKey(): Key? {
-                return aesKey
-            }
-
-            override fun getIv(): ByteArray? {
-                return "12345678".toByteArray()
-            }
-        })
+                    }.generateKey(),
+                "1234567812345678".toByteArray()
+            )
+            .build()
         val ed11 = encrypter1.encrypt(originalData)
         val ed12 = encrypter1.encrypt(originalData, false)
         val ed13 = encrypter1.encrypt(originalData, false)
         assertEquals(ed11, ed12)
         assertEquals(ed12, ed13)
+        assertNotNull(ed11)
         encrypter1.resetKeys()
         assertEquals(encrypter1.encrypt(originalData), ed11)
 
-
-        val encrypter2 = Encrypter(appContext, object : SecretKeyProvider() {
-            val aesKey by lazy {
+        val encrypter2 = Encrypter.Builder(appContext, "testAlias2")
+            .setSecretKey(
                 KeyGenerator.getInstance("AES")
                     .apply {
                         init(256)
-                    }.generateKey()
-            }
-
-            override fun getAlias() = "testAlias2"
-
-            override fun getSecretKey(): Key? {
-                return aesKey
-            }
-
-            override fun getIv(): ByteArray? {
-                return null
-            }
-        })
+                    }.generateKey(),
+                null
+            )
+            .build()
         val ed21 = encrypter2.encrypt(originalData)
         val ed22 = encrypter2.encrypt(originalData, false)
         val ed23 = encrypter2.encrypt(originalData, false)
@@ -227,32 +201,33 @@ class EncrypterTest {
         assertNotEquals(ed21, ed22)
         assertEquals(ed22, ed23)
         assertEquals(ed23, ed24)
+        assertNotNull(ed21)
+        assertNotNull(ed22)
+        assertNotNull(ed23)
+        assertNotNull(ed24)
 
-        val encrypter3 = Encrypter(appContext, object : SecretKeyProvider() {
-            val aesKey by lazy {
+        val encrypter3 = Encrypter.Builder(appContext, "")
+            .setSecretKey(
                 KeyGenerator.getInstance("AES")
                     .apply {
                         init(256)
-                    }.generateKey()
-            }
-
-            override fun getAlias() = ""
-
-            override fun getSecretKey(): Key? {
-                return aesKey
-            }
-
-            override fun getIv(): ByteArray? {
-                return null
-            }
-        })
+                    }.generateKey(),
+                null
+            )
+            .build()
         val ed31 = encrypter3.encrypt(originalData)
         val ed32 = encrypter3.encrypt(originalData)
         val ed33 = encrypter3.encrypt(originalData, false)
+        val ed34 = encrypter3.encrypt(originalData, false)
         assertNotNull(ed31)
         assertNotNull(ed32)
         assertNotEquals(ed31, ed32)
-        assertNull(ed33)
+        assertNotNull(ed33)
+        assertEquals(ed33, ed34)
+        assertNotNull(ed31)
+        assertNotNull(ed32)
+        assertNotNull(ed33)
+        assertNotNull(ed34)
     }
 
     @Test
@@ -269,6 +244,10 @@ class EncrypterTest {
             val e1 = encrypter1.encrypt(data, false)
             val e2 = encrypter2.encrypt(data, false)
             val e3 = encrypter3.encrypt(data, false)
+            assertNotNull(e1)
+            assertNotNull(e2)
+            assertNotNull(e3)
+
             assertEquals(e1, e2)
             assertNotEquals(e1, e3)
             assertNotEquals(e2, e3)

@@ -3,6 +3,7 @@ package com.lokile.encrypter.encrypters.imp
 import android.content.Context
 import android.os.Build
 import android.util.Base64
+import android.util.Log
 import androidx.core.content.edit
 import com.lokile.encrypter.encrypters.EncryptedData
 import com.lokile.encrypter.encrypters.IEncrypter
@@ -14,31 +15,20 @@ import java.security.Key
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 
-abstract class BaseEncrypter : IEncrypter {
-    protected lateinit var algorithm: String
+abstract class BaseEncrypter(context: Context, val alias: String) : IEncrypter {
+    protected var algorithm: String = "AES/CBC/PKCS7PADDING"
     protected val cipher by lazy { Cipher.getInstance(algorithm) }
-    protected var keyProvider: ISecretKeyProvider
-    protected var app: Context
+    protected lateinit var keyProvider: ISecretKeyProvider
+    protected var app = context.applicationContext
     protected var fixedIv: ByteArray? = null
     protected lateinit var secretKey: Key
     private val prefName = "xfhw9LYsjwSaR4cfAakQhVFn1"
     private val savedIvKeyWord = "352VZrcCFprRHWZ8cg9DvytRb"
 
-    constructor(context: Context, keyProvider: ISecretKeyProvider, algorithm: String) {
-        app = context.applicationContext
-        this.keyProvider = keyProvider
-        this.algorithm = algorithm
-        loadKey()
-    }
-
-    constructor(context: Context, alias: String, algorithm: String) {
-        app = context.applicationContext
-        this.keyProvider = loadDefaultKeyProvider(alias)
-        this.algorithm = algorithm
-        loadKey()
-    }
-
     protected fun initCipher(mode: Int, iv: ByteArray? = null) {
+        if (!this::secretKey.isInitialized) {
+            loadKey()
+        }
         if (iv != null) {
             cipher.init(
                 mode, secretKey, IvParameterSpec(iv)
@@ -51,6 +41,7 @@ abstract class BaseEncrypter : IEncrypter {
     }
 
     protected fun loadDefaultKeyProvider(alias: String): ISecretKeyProvider {
+        Log.d("AndroidUtils", "alias: $alias")
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             AESSecretKeyProvider(alias)
         } else {
@@ -59,17 +50,22 @@ abstract class BaseEncrypter : IEncrypter {
     }
 
     protected fun loadKey() {
+        if (!this::keyProvider.isInitialized) {
+            this.keyProvider = loadDefaultKeyProvider("alias" + alias)
+        }
         secretKey =
             keyProvider.getSecretKey() ?: throw Exception("Error when loading the secretKey")
     }
 
     protected fun saveFixedIv(iv: ByteArray, useRandomizeIv: Boolean) {
+        if (!this::keyProvider.isInitialized) {
+            this.keyProvider = loadDefaultKeyProvider("alias" + alias)
+        }
+
         if (this.keyProvider.getIv() != null || useRandomizeIv || this.fixedIv != null) {
             return
         }
-        if (keyProvider.getAlias().isEmpty()) {
-            throw Exception("Alias is empty")
-        }
+
         this.fixedIv = iv
         initCipher(Cipher.ENCRYPT_MODE)
         val ivData = cipher.doFinal(iv)
@@ -77,7 +73,7 @@ abstract class BaseEncrypter : IEncrypter {
         app.getSharedPreferences(prefName, Context.MODE_PRIVATE)
             .edit {
                 putString(
-                    savedIvKeyWord + keyProvider.getAlias(),
+                    savedIvKeyWord + alias,
                     Base64.encodeToString(
                         ByteBuffer.allocate(ivIv.size + ivData.size + 1)
                             .apply {
@@ -91,6 +87,10 @@ abstract class BaseEncrypter : IEncrypter {
     }
 
     protected fun loadFixedIv(useRandomizeIv: Boolean): ByteArray? {
+        if (!this::keyProvider.isInitialized) {
+            this.keyProvider = loadDefaultKeyProvider("alias" + alias)
+        }
+
         val encryptIv = this.keyProvider.getIv()
         if (encryptIv != null || useRandomizeIv) {
             return encryptIv
@@ -99,17 +99,13 @@ abstract class BaseEncrypter : IEncrypter {
             return this.fixedIv
         }
 
-        if (keyProvider.getAlias().isEmpty()) {
-            throw Exception("Alias is empty")
-        }
-
         val pref = app.getSharedPreferences(prefName, Context.MODE_PRIVATE)
-        val encryptedIv = pref.getString(savedIvKeyWord + keyProvider.getAlias(), null)
+        val encryptedIv = pref.getString(savedIvKeyWord + alias, null)
         if (encryptedIv != null) {
             return decrypt(Base64.decode(encryptedIv, Base64.DEFAULT)).apply {
                 if (this == null) {
                     pref.edit {
-                        remove(savedIvKeyWord + keyProvider.getAlias())
+                        remove(savedIvKeyWord + alias)
                     }
                 }
             }
@@ -158,18 +154,22 @@ abstract class BaseEncrypter : IEncrypter {
     }
 
     override fun resetKeys(): Boolean {
-        synchronized(this) {
-            try {
-                app.getSharedPreferences(prefName, Context.MODE_PRIVATE).edit {
-                    remove(savedIvKeyWord + keyProvider.getAlias())
+        if (this::keyProvider.isInitialized) {
+            synchronized(this) {
+                try {
+                    app.getSharedPreferences(prefName, Context.MODE_PRIVATE).edit {
+                        remove(savedIvKeyWord + alias)
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        app.deleteSharedPreferences(prefName)
+                    }
+                    return keyProvider.removeSecretKey()
+                } finally {
+                    loadKey()
                 }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    app.deleteSharedPreferences(prefName)
-                }
-                return keyProvider.removeSecretKey()
-            } finally {
-                loadKey()
             }
+        } else {
+            return false
         }
     }
 }

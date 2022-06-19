@@ -10,10 +10,6 @@ internal abstract class BaseSecretKeyProvider(val privateAlias: String) : ISecre
     protected val AES_ALGORITHM = "AES"
     protected val KEY_STORE_NAME = "AndroidKeyStore"
 
-    override fun getAlias(): String {
-        return privateAlias
-    }
-
     protected fun createNewAesKey(): SecretKey {
         return KeyGenerator.getInstance(AES_ALGORITHM)
             .apply { init(KEY_SIZE) }

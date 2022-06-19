@@ -40,12 +40,16 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
 
     private fun getAesKey(): Key {
         val pref = app.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        val encryptKey = pref.getString(prefAlias, null)
-        if (!encryptKey.isNullOrEmpty()) {
-            val key = unwrapAesKey(
-                Base64.decode(encryptKey, Base64.DEFAULT)
-            )
-            return key
+        try {
+            val encryptKey = pref.getString(prefAlias, null)
+            if (!encryptKey.isNullOrEmpty()) {
+                val key = unwrapAesKey(
+                    Base64.decode(encryptKey, Base64.DEFAULT)
+                )
+                return key
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
         val aesKey = createNewAesKey()
