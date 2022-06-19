@@ -43,6 +43,9 @@ try {
 ```
 - Or you can use the builder:
 ```
+import com.lokile.encrypter.encrypters.imp.Encrypter
+......
+var encrypter: Encrypter
 try {
   encrypter = Encrypter
       .Builder(appContext, "your_alias")
