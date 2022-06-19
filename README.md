@@ -12,7 +12,7 @@ The library also allows you to provide your secret key to encrypt/decrypt so tha
 - Java 1.8+
 
 ## Installation
-Add the following code to to your root build.gradle at the end of repositories:
+Add the following code to your root build.gradle at the end of repositories:
 ```
   allprojects {
       repositories {
