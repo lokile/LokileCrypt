@@ -82,8 +82,6 @@ val decrypted1:ByteArray? = encrypter.decryptOrNull(encrypted1)
 // val decrypted1Str = String(decrypted1)
 ```
 
-## License:
-MIT is the project license so feel free to use it :tada:
 
 ## Want to contribute? ##
 
