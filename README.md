@@ -40,8 +40,6 @@ var encrypter = Encrypter(context=context,alias="your_alias")
 ```
 import com.lokile.encrypter.encrypters.imp.Encrypter
 ......
-import com.lokile.encrypter.encrypters.imp.Encrypter
-......
 var encrypter = Encrypter
       .Builder(appContext, "your_alias")
       
