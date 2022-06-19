@@ -30,7 +30,7 @@ Then, add the dependency to your app build.gradle file, the latest version is: [
 
 ## Usage:
 ### Create the object:
-- Just create the Encrypter object and use it to encrypt/decrypt your data, it will generate a new secret key for the input alias and store in [Android KeyStore System](https://developer.android.com/training/articles/keystore.html).
+- The simple way:
 ```
 import com.lokile.encrypter.encrypters.imp.Encrypter
 ......
