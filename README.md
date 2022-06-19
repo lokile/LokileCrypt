@@ -35,6 +35,7 @@ Then, add the dependency to your app build.gradle file, the latest version is: [
 import com.lokile.encrypter.encrypters.imp.Encrypter
 ......
 var encrypter = Encrypter(context=context,alias="your_alias")
+//alias: your keyword to communicate with Android KeyStore System
 ```
 - Or you can use the builder:
 ```
@@ -42,7 +43,7 @@ import com.lokile.encrypter.encrypters.imp.Encrypter
 ......
 var encrypter = Encrypter
                   .Builder(appContext, "your_alias")
-                  .setSecretKey(your_aes_key, your_iv_key)
+                  .setSecretKey(your_aes_key, your_iv_key) //set your own keys instead of using Android KeyStore System
                   .setEncryptAlgorithm("your_encrypt_algorithm") //default is "AES/CBC/PKCS7PADDING"
                   .setErrorListener { encrypterError, throwable ->  }
                   .build()
