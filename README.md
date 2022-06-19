@@ -36,34 +36,19 @@ import com.lokile.encrypter.encrypters.imp.Encrypter
 ......
 var encrypter: Encrypter
 try {
-  encrypter = Encrypter(
-    context=context,
-    alias="your_alias", // it's a keyword to save/load the secret key in keystore,
-    //algorithm="your_encryption_algorithm" //default value is "AES/CBC/PKCS7PADDING"
-  )
+  encrypter = Encrypter(context=context,alias="your_alias")
 } catch(e: Exception) {
   Log.e(TAG, "Failed to create the Encrypter", e)
 }
 ```
-- You can provide your secret key to encrypt/decrypt your data:
+- You can custom it using the builder:
 ```
 try {
-    encrypter = Encrypter(
-        context = appContext,
-        keyProvider = object : SecretKeyProvider() {
-            override fun getAlias() = "Your alias"
-            
-            override fun getSecretKey(): Key? {
-                TODO("Not yet implemented")
-            }
-
-            override fun getIv(): ByteArray? {
-              //return null if you want to use randomize iv
-              return null
-            }
-        },
-        //algorithm="your_encryption_algorithm" //default value is "AES/CBC/PKCS7PADDING"
-    )
+  Encrypter
+    .Builder(appContext, "your_alias")
+    .setSecretKey(your_aes_key, your_iv_key)
+    .setEncryptAlgorithm("your_encrypt_algorithm")
+    .build()
 } catch (e: Exception) {
     Log.e(TAG, "Failed to create the Encrypter", e)
 }
