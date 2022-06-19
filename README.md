@@ -3,8 +3,7 @@
 
 
 ## Overview
-This library performs encryption and decryption using the AES 256-bit encryption algorithm. It uses [Android KeyStore System](https://developer.android.com/training/articles/keystore.html) to makes it more difficult to extract the secret key from the device. 
-The library also allows you to provide your secret key to encrypt/decrypt so that you can transfer/received the encrypted data to/from outside of the app.
+This libraryperforms encryption and decryption using the AES 256-bit encryption algorithm. It uses [Android KeyStore System](https://developer.android.com/training/articles/keystore.html) to make it more difficult to extract the secret key from the device. Besides using the KeyStore, the library also allows you to provide your secret key to encrypt/decrypt so that you can transfer or receive the encrypted data outside of the app.
 
 ## Requirements
 - Android API 18 or higher
