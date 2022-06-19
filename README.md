@@ -40,12 +40,21 @@ var encrypter = Encrypter(context=context,alias="your_alias")
 ```
 import com.lokile.encrypter.encrypters.imp.Encrypter
 ......
+import com.lokile.encrypter.encrypters.imp.Encrypter
+......
 var encrypter = Encrypter
-                  .Builder(appContext, "your_alias")
-                  .setSecretKey(your_aes_key, your_iv_key) //set your own keys instead of using Android KeyStore System
-                  .setEncryptAlgorithm("your_encrypt_algorithm") //default is "AES/CBC/PKCS7PADDING"
-                  .setErrorListener { encrypterError, throwable ->  }
-                  .build()
+      .Builder(appContext, "your_alias")
+      
+      //set your own keys instead of using Android KeyStore System
+      .setSecretKey(your_aes_key, your_iv_key) 
+
+      //default is "AES/CBC/PKCS7PADDING"
+      .setEncryptAlgorithm("your_encrypt_algorithm") 
+
+      //error handling
+      .setErrorListener { encrypterError, throwable ->  }
+      
+      .build()
 ```
 ### Encrypt your data:
 - The simple was to perform encryption (the IV key is randomized):
