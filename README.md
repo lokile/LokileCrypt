@@ -69,8 +69,8 @@ val result2:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false) // 
 val result1:EncryptedData? = encrypter.encrypt(toBeEncrypted.toByteArray())
 //result1.data
 //result1.iv
-//result1.toStringData() //to merge the data and iv to a single String
-//result1.toByteArray()  //to merge the data and iv to a single ByteArray
+//result1.toStringData()
+//result1.toByteArray()
 ```
 
 ### Decrypt your data:
