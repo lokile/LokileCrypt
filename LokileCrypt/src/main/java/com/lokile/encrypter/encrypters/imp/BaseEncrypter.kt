@@ -3,7 +3,6 @@ package com.lokile.encrypter.encrypters.imp
 import android.content.Context
 import android.os.Build
 import android.util.Base64
-import android.util.Log
 import androidx.core.content.edit
 import com.lokile.encrypter.encrypters.EncryptedData
 import com.lokile.encrypter.encrypters.IEncrypter
@@ -24,6 +23,7 @@ abstract class BaseEncrypter(context: Context, val alias: String) : IEncrypter {
     protected lateinit var secretKey: Key
     private val prefName = "xfhw9LYsjwSaR4cfAakQhVFn1"
     private val savedIvKeyWord = "352VZrcCFprRHWZ8cg9DvytRb"
+    protected var onErrorListener: ((error: EncrypterError, throwable: Throwable) -> Unit)? = null
 
     protected fun initCipher(mode: Int, iv: ByteArray? = null) {
         if (!this::secretKey.isInitialized) {
@@ -41,7 +41,6 @@ abstract class BaseEncrypter(context: Context, val alias: String) : IEncrypter {
     }
 
     protected fun loadDefaultKeyProvider(alias: String): ISecretKeyProvider {
-        Log.d("AndroidUtils", "alias: $alias")
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             AESSecretKeyProvider(alias)
         } else {
@@ -53,8 +52,12 @@ abstract class BaseEncrypter(context: Context, val alias: String) : IEncrypter {
         if (!this::keyProvider.isInitialized) {
             this.keyProvider = loadDefaultKeyProvider("alias" + alias)
         }
-        secretKey =
-            keyProvider.getSecretKey() ?: throw Exception("Error when loading the secretKey")
+        val key = keyProvider.getSecretKey()
+        if (key != null) {
+            secretKey = key
+        } else {
+            throw Exception("Error when loading the secretKey")
+        }
     }
 
     protected fun saveFixedIv(iv: ByteArray, useRandomizeIv: Boolean) {
@@ -125,7 +128,8 @@ abstract class BaseEncrypter(context: Context, val alias: String) : IEncrypter {
                 saveFixedIv(iv, useRandomizeIv)
                 return EncryptedData(output, iv)
             } catch (e: Exception) {
-                e.printStackTrace()
+                onErrorListener?.invoke(EncrypterError.ENCRYPT_ERROR, e)
+                    ?: e.printStackTrace()
                 return null
             }
         }
@@ -137,7 +141,8 @@ abstract class BaseEncrypter(context: Context, val alias: String) : IEncrypter {
                 initCipher(Cipher.DECRYPT_MODE, data.iv)
                 return cipher.doFinal(data.data)
             } catch (e: Exception) {
-                e.printStackTrace()
+                onErrorListener?.invoke(EncrypterError.DECRYPT_ERROR, e)
+                    ?: e.printStackTrace()
                 return null
             }
         }

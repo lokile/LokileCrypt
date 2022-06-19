@@ -112,7 +112,6 @@ class EncrypterTest {
         }
     }
 
-
     @Test
     fun testEncryptersInByteWithRandomIv() {
         encrypters.forEach {

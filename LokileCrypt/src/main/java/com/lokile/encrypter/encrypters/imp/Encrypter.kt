@@ -2,7 +2,6 @@ package com.lokile.encrypter.encrypters.imp
 
 import android.content.Context
 import android.util.Base64
-import androidx.annotation.VisibleForTesting
 import com.lokile.encrypter.encrypters.EncryptedData
 import com.lokile.encrypter.secretKeyProviders.ISecretKeyProvider
 import java.security.Key
@@ -68,6 +67,11 @@ class Encrypter constructor(context: Context, alias: String) :
 
         fun setEncryptAlgorithm(algorithm: String): Builder {
             encrypter.algorithm = algorithm
+            return this
+        }
+
+        fun setErrorListener(listener: (EncrypterError, Throwable) -> Unit):Builder {
+            encrypter.onErrorListener = listener
             return this
         }
 
