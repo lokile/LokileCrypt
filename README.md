@@ -28,7 +28,7 @@ Then, add the dependency to your app build.gradle file, the latest version is: [
 
 ## Usage:
 ### Create the object:
-- The simple way:
+- Just create it:
 ```
 import com.lokile.encrypter.encrypters.imp.Encrypter
 ......
@@ -48,17 +48,14 @@ var encrypter = Encrypter
       //default is "AES/CBC/PKCS7PADDING"
       .setEncryptAlgorithm("your_encrypt_algorithm") 
 
-      //error handling
-      .setErrorListener { encrypterError, throwable ->  }
-      
       .build()
 ```
 ### Encrypt your data:
 - The simple was to perform encryption (the IV key is randomized):
 ```
 val toBeEncrypted="Hello World!"
-val result1:String? = encrypter.encrypt(toBeEncrypted)
-val result2:String? = encrypter.encrypt(toBeEncrypted) // result1 != result2
+val result1:String? = encrypter.encryptOrNull(toBeEncrypted)
+val result2:String? = encrypter.encryptOrNull(toBeEncrypted) // result1 != result2
 
 /* The library will generate a new randomized IV key when performing encryption,
 so the encrypted results are not the same for the same input*/
@@ -66,12 +63,12 @@ so the encrypted results are not the same for the same input*/
 - To make the encrypted data are the same for the same input (NOT randomized IV key):
 ```
 val toBeEncrypted="Hello World!"
-val result1:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false)
-val result2:String? = encrypter.encrypt(toBeEncrypted, useRandomizeIv=false) // result1 == result2
+val result1:String? = encrypter.encryptOrNull(toBeEncrypted, useRandomizeIv=false)
+val result2:String? = encrypter.encryptOrNull(toBeEncrypted, useRandomizeIv=false) // result1 == result2
 ```
 - The above functions merges the IV key and the encrypted data into single output String, use the following code instead to separate these data:
 ```
-val result1:EncryptedData? = encrypter.encrypt(toBeEncrypted.toByteArray())
+val result1:EncryptedData? = encrypter.encryptOrNull(toBeEncrypted.toByteArray())
 //result1.data
 //result1.iv
 //result1.toStringData()
@@ -81,7 +78,7 @@ val result1:EncryptedData? = encrypter.encrypt(toBeEncrypted.toByteArray())
 ### Decrypt your data:
 
 ```
-val decrypted1:ByteArray? = encrypter.decrypt(encrypted1)
+val decrypted1:ByteArray? = encrypter.decryptOrNull(encrypted1)
 // val decrypted1Str = String(decrypted1)
 ```
 
@@ -91,3 +88,7 @@ MIT is the project license so feel free to use it :tada:
 ## Want to contribute? ##
 
 Fell free to contribute, I really like pull requests :octocat:
+
+
+
+--- Finally, please give me a star if you like this library ---
