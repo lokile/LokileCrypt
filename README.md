@@ -49,7 +49,7 @@ var encrypter = Encrypter
                   .build()
 ```
 ### Encrypt your data:
-- Following is the simple way to perform encryption with randomized IV key:
+- The simple was to perform encryption (the IV key is randomized):
 ```
 val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encrypt(toBeEncrypted)
