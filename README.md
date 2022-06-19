@@ -41,7 +41,7 @@ try {
   Log.e(TAG, "Failed to create the Encrypter", e)
 }
 ```
-- You can custom it using the builder:
+- Or you can use the builder:
 ```
 try {
   Encrypter
