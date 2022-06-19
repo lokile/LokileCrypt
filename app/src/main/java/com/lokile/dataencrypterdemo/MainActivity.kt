@@ -15,9 +15,9 @@ class MainActivity : AppCompatActivity() {
     fun demoByteEncrypter() {
         val e = Encrypter(this, "demo")
         val source = "demo123"
-        val encrypted = e.encrypt(source.toByteArray())
+        val encrypted = e.encryptOrNull(source.toByteArray())
         if (encrypted != null) {
-            val decrypted = e.decrypt(encrypted)
+            val decrypted = e.decryptOrNull(encrypted)
             if (decrypted != null) {
                 Log.d("AndroidUtils", "Successful, data=${String(decrypted)}")
             } else {

@@ -3,40 +3,88 @@ package com.lokile.encrypter.encrypters.imp
 import android.content.Context
 import android.util.Base64
 import com.lokile.encrypter.encrypters.EncryptedData
+import com.lokile.encrypter.encrypters.IEncrypter
+import com.lokile.encrypter.encrypters.toEncryptedData
 import com.lokile.encrypter.secretKeyProviders.ISecretKeyProvider
 import java.security.Key
-import java.util.*
+import javax.crypto.Cipher
 
 class Encrypter constructor(context: Context, alias: String) :
-    BaseEncrypter(context, alias) {
+    BaseEncrypter(context, alias), IEncrypter {
 
-    override fun encrypt(data: ByteArray, useRandomizeIv: Boolean): EncryptedData? {
-        return super.encrypt(data, useRandomizeIv)
+    override fun encrypt(data: ByteArray, useRandomizeIv: Boolean): EncryptedData {
+        return encryptData(data, useRandomizeIv)
     }
 
-    override fun decrypt(data: EncryptedData): ByteArray? {
-        return super.decrypt(data)
+    override fun decrypt(data: EncryptedData): ByteArray {
+        return decryptData(data)
     }
 
-    override fun encrypt(data: String, useRandomizeIv: Boolean): String? {
-        return encrypt(data.toByteArray(), useRandomizeIv)?.toStringData()
+    override fun encrypt(data: String, useRandomizeIv: Boolean): String {
+        return encryptData(data.toByteArray(), useRandomizeIv).toStringData()
     }
 
-    override fun decrypt(data: ByteArray): ByteArray? {
-        if (data.isEmpty()) {
+    override fun decrypt(data: ByteArray): ByteArray {
+        return decryptData(data.toEncryptedData())
+    }
+
+    override fun decrypt(data: String): String {
+        return String(decryptData(data.toEncryptedData()))
+    }
+
+    override fun encryptOrNull(data: ByteArray, useRandomizeIv: Boolean): EncryptedData? {
+        return try {
+            encrypt(data, useRandomizeIv)
+        } catch (e: Exception) {
+            e.printStackTrace()
             return null
         }
-        val ivSize = data[0].toInt()
-        return decrypt(
-            EncryptedData(
-                Arrays.copyOfRange(data, ivSize + 1, data.size),
-                Arrays.copyOfRange(data, 1, ivSize + 1)
-            )
-        )
     }
 
-    override fun decrypt(data: String): String? {
-        return decrypt(Base64.decode(data, Base64.DEFAULT))?.let { String(it) }
+    override fun encryptOrNull(data: String, useRandomizeIv: Boolean): String? {
+        return try {
+            encrypt(data, useRandomizeIv)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+    }
+
+    override fun decryptOrNull(data: ByteArray): ByteArray? {
+        return try {
+            decrypt(data)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+    }
+
+    override fun decryptOrNull(data: String): String? {
+        return try {
+            decrypt(data)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+    }
+
+    override fun decryptOrNull(data: EncryptedData): ByteArray? {
+        return try {
+            decrypt(data)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+    }
+
+    override fun getEncryptCipher(useRandomizeIv: Boolean): Cipher {
+        initCipher(Cipher.ENCRYPT_MODE, loadFixedIv(useRandomizeIv))
+        return cipher
+    }
+
+    override fun getDecryptCipher(iv: ByteArray): Cipher {
+        initCipher(Cipher.DECRYPT_MODE, iv)
+        return cipher
     }
 
     class Builder(context: Context, alias: String) {
@@ -47,13 +95,13 @@ class Encrypter constructor(context: Context, alias: String) :
             return this
         }
 
-        fun setSecretKey(key: Key, iv: ByteArray? = null): Builder {
+        fun setSecretKey(aesKey: Key, iv: ByteArray): Builder {
             encrypter.keyProvider = object : ISecretKeyProvider {
                 override fun getSecretKey(): Key {
-                    return key
+                    return aesKey
                 }
 
-                override fun getIv(): ByteArray? {
+                override fun getIv(): ByteArray {
                     return iv
                 }
 
@@ -65,13 +113,25 @@ class Encrypter constructor(context: Context, alias: String) :
             return this
         }
 
-        fun setEncryptAlgorithm(algorithm: String): Builder {
-            encrypter.algorithm = algorithm
+        fun setSecretKey(aesKey: Key): Builder {
+            encrypter.keyProvider = object : ISecretKeyProvider {
+                override fun getSecretKey(): Key {
+                    return aesKey
+                }
+
+                override fun getIv(): ByteArray? {
+                    return null
+                }
+
+                override fun removeSecretKey(): Boolean {
+                    return false
+                }
+            }
             return this
         }
 
-        fun setErrorListener(listener: (EncrypterError, Throwable) -> Unit):Builder {
-            encrypter.onErrorListener = listener
+        fun setEncryptAlgorithm(algorithm: String): Builder {
+            encrypter.algorithm = algorithm
             return this
         }
 

@@ -14,7 +14,6 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.security.Key
 import javax.crypto.KeyGenerator
 
 
@@ -59,9 +58,9 @@ class EncrypterTest {
                     KeyGenerator.getInstance("AES")
                         .apply {
                             init(256)
-                        }.generateKey(),
-                    null
-                ).build()
+                        }.generateKey()
+                )
+                .build()
         )
     }
 
@@ -70,8 +69,7 @@ class EncrypterTest {
         encrypters.forEach { encrypter ->
             val source = "DemoText"
             val encrypted1 = encrypter.encrypt(source, false)
-            assertNotNull(encrypted1)
-            val decrypted1 = encrypter.decrypt(encrypted1!!)
+            val decrypted1 = encrypter.decrypt(encrypted1)
             assertEquals(decrypted1, source)
             assertEquals(encrypter.encrypt(source, false), encrypted1)
         }
@@ -83,7 +81,7 @@ class EncrypterTest {
             val source = "DemoText"
             val encrypted1 = encrypter.encrypt(source)
             assertNotNull(encrypted1)
-            val decrypted1 = encrypter.decrypt(encrypted1!!)
+            val decrypted1 = encrypter.decrypt(encrypted1)
             assertEquals(decrypted1, source)
             assertNotEquals(encrypter.encrypt(source), encrypted1)
         }
@@ -95,18 +93,18 @@ class EncrypterTest {
             val source = "DemoText"
             val encrypted1 = it.encrypt(source.toByteArray(), false)
             assertNotNull(encrypted1)
-            val decrypted1 = it.decrypt(encrypted1!!)
+            val decrypted1 = it.decrypt(encrypted1)
             val decrypted2 = it.decrypt(encrypted1.toByteArray())
 
             assertNotNull(decrypted1)
             assertNotNull(decrypted2)
 
             assertTrue(decrypted1.contentEquals(decrypted2))
-            assertEquals(source, String(decrypted1!!))
-            assertEquals(source, String(decrypted2!!))
+            assertEquals(source, String(decrypted1))
+            assertEquals(source, String(decrypted2))
 
             assertEquals(
-                it.encrypt(source.toByteArray(), false)?.toStringData()!!,
+                it.encrypt(source.toByteArray(), false).toStringData(),
                 encrypted1.toStringData()
             )
         }
@@ -118,18 +116,18 @@ class EncrypterTest {
             val source = "DemoText"
             val encrypted1 = it.encrypt(source.toByteArray())
             assertNotNull(encrypted1)
-            val decrypted1 = it.decrypt(encrypted1!!)
+            val decrypted1 = it.decrypt(encrypted1)
             val decrypted2 = it.decrypt(encrypted1.toByteArray())
 
             assertNotNull(decrypted1)
             assertNotNull(decrypted2)
 
             assertTrue(decrypted1.contentEquals(decrypted2))
-            assertEquals(source, String(decrypted1!!))
-            assertEquals(source, String(decrypted2!!))
+            assertEquals(source, String(decrypted1))
+            assertEquals(source, String(decrypted2))
 
             assertNotEquals(
-                it.encrypt(source.toByteArray())?.toStringData()!!,
+                it.encrypt(source.toByteArray()).toStringData(),
                 encrypted1.toStringData()
             )
         }
@@ -162,7 +160,7 @@ class EncrypterTest {
     }
 
     @Test
-    fun testFixedIvWithCustomKeyProvider() {
+    fun testFixed_IV_WithCustomKeyProvider() {
         val originalData = " Hello world!"
         val encrypter1 = Encrypter
             .Builder(appContext, "testAlias1")
@@ -188,8 +186,7 @@ class EncrypterTest {
                 KeyGenerator.getInstance("AES")
                     .apply {
                         init(256)
-                    }.generateKey(),
-                null
+                    }.generateKey()
             )
             .build()
         val ed21 = encrypter2.encrypt(originalData)
@@ -199,7 +196,7 @@ class EncrypterTest {
         val ed24 = encrypter2.encrypt(originalData, false)
         assertNotEquals(ed21, ed22)
         assertEquals(ed22, ed23)
-        assertEquals(ed23, ed24)
+        assertNotEquals(ed23, ed24)
         assertNotNull(ed21)
         assertNotNull(ed22)
         assertNotNull(ed23)
@@ -210,8 +207,7 @@ class EncrypterTest {
                 KeyGenerator.getInstance("AES")
                     .apply {
                         init(256)
-                    }.generateKey(),
-                null
+                    }.generateKey()
             )
             .build()
         val ed31 = encrypter3.encrypt(originalData)
@@ -258,19 +254,69 @@ class EncrypterTest {
     }
 
     @Test
+    fun testGetOrNullFunctions() {
+        encrypters.forEach { encrypter ->
+            val source = "DemoText"
+            val e1 = encrypter.encrypt(source.toByteArray(), false)
+            val e11 = encrypter.encryptOrNull(source.toByteArray(), false)
+            assertEquals(e1.toStringData(), e11?.toStringData())
+
+            val e2 = encrypter.encrypt(source, false)
+            val e21 = encrypter.encryptOrNull(source, false)
+            assertEquals(e2, e21)
+
+            assertTrue(
+                encrypter.decrypt(e1).contentEquals(
+                    source.toByteArray()
+                )
+            )
+            assertTrue(
+                encrypter.decryptOrNull(e1).contentEquals(
+                    source.toByteArray()
+                )
+            )
+
+            assertTrue(
+                encrypter.decrypt(e1.toByteArray()).contentEquals(
+                    source.toByteArray()
+                )
+            )
+            assertTrue(
+                encrypter.decryptOrNull(e1.toByteArray()).contentEquals(
+                    source.toByteArray()
+                )
+            )
+
+            assertTrue(
+                encrypter.decrypt(e11!!.toByteArray()).contentEquals(
+                    source.toByteArray()
+                )
+            )
+            assertTrue(
+                encrypter.decryptOrNull(e11.toByteArray()).contentEquals(
+                    source.toByteArray()
+                )
+            )
+
+            assertTrue(encrypter.decrypt(e2) == source)
+            assertTrue(encrypter.decryptOrNull(e2) == source)
+
+            assertTrue(encrypter.decrypt(e21!!) == source)
+            assertTrue(encrypter.decryptOrNull(e21) == source)
+        }
+    }
+
+    @Test
     fun testResetKey() {
         encrypters.forEach { encrypter ->
             val source = "DemoText"
             val encrypted = encrypter.encrypt(source)
-            assertNotNull(encrypted)
-
-            val decrypted = encrypter.decrypt(encrypted!!)
-            assertNotNull(decrypted)
+            val decrypted = encrypter.decrypt(encrypted)
 
             assertEquals(source, decrypted)
 
             if (encrypter.resetKeys()) {
-                val decrypted2 = encrypter.decrypt(encrypted)
+                val decrypted2 = encrypter.decryptOrNull(encrypted)
                 assertNull(decrypted2)
             }
         }
