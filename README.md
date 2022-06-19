@@ -47,7 +47,7 @@ var encrypter = Encrypter
                   .setErrorListener { encrypterError, throwable ->  }
                   .build()
 ```
-### Encryption
+### Encrypt your data:
 - Following is the simple way to perform encryption with randomized IV key:
 ```
 val toBeEncrypted="Hello World!"
@@ -72,7 +72,7 @@ val result1:EncryptedData? = encrypter.encrypt(toBeEncrypted.toByteArray())
 //result1.toByteArray()  //to merge the data and iv to a single ByteArray
 ```
 
-### Decryption
+### Decrypt your data:
 
 ```
 val decrypted1:ByteArray? = encrypter.decrypt(encrypted1)
