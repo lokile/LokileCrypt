@@ -43,7 +43,7 @@ import com.lokile.encrypter.encrypters.imp.Encrypter
 var encrypter = Encrypter
                   .Builder(appContext, "your_alias")
                   .setSecretKey(your_aes_key, your_iv_key)
-                  .setEncryptAlgorithm("your_encrypt_algorithm")
+                  .setEncryptAlgorithm("your_encrypt_algorithm") //default is "AES/CBC/PKCS7PADDING"
                   .setErrorListener { encrypterError, throwable ->  }
                   .build()
 ```
