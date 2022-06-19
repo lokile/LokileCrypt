@@ -44,11 +44,11 @@ try {
 - Or you can use the builder:
 ```
 try {
-  Encrypter
-    .Builder(appContext, "your_alias")
-    .setSecretKey(your_aes_key, your_iv_key)
-    .setEncryptAlgorithm("your_encrypt_algorithm")
-    .build()
+  encrypter = Encrypter
+      .Builder(appContext, "your_alias")
+      .setSecretKey(your_aes_key, your_iv_key)
+      .setEncryptAlgorithm("your_encrypt_algorithm")
+      .build()
 } catch (e: Exception) {
     Log.e(TAG, "Failed to create the Encrypter", e)
 }
