@@ -34,27 +34,18 @@ Then, add the dependency to your app build.gradle file, the latest version is: [
 ```
 import com.lokile.encrypter.encrypters.imp.Encrypter
 ......
-var encrypter: Encrypter
-try {
-  encrypter = Encrypter(context=context,alias="your_alias")
-} catch(e: Exception) {
-  Log.e(TAG, "Failed to create the Encrypter", e)
-}
+var encrypter = Encrypter(context=context,alias="your_alias")
 ```
 - Or you can use the builder:
 ```
 import com.lokile.encrypter.encrypters.imp.Encrypter
 ......
-var encrypter: Encrypter
-try {
-  encrypter = Encrypter
-      .Builder(appContext, "your_alias")
-      .setSecretKey(your_aes_key, your_iv_key)
-      .setEncryptAlgorithm("your_encrypt_algorithm")
-      .build()
-} catch (e: Exception) {
-    Log.e(TAG, "Failed to create the Encrypter", e)
-}
+var encrypter = Encrypter
+                  .Builder(appContext, "your_alias")
+                  .setSecretKey(your_aes_key, your_iv_key)
+                  .setEncryptAlgorithm("your_encrypt_algorithm")
+                  .setErrorListener { encrypterError, throwable ->  }
+                  .build()
 ```
 ### Encryption
 - Following is the simple way to perform encryption with randomized IV key:
