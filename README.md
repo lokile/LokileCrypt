@@ -7,7 +7,6 @@ This libraryperforms encryption and decryption using the AES 256-bit encryption 
 
 ## Requirements
 - Android API 18 or higher
-- Android Studio 4.1+
 - Java 1.8+
 
 ## Installation
