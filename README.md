@@ -3,7 +3,7 @@
 
 
 ## Overview
-This libraryperforms encryption and decryption using the AES 256-bit encryption algorithm. It uses [Android KeyStore System](https://developer.android.com/training/articles/keystore.html) to make it more difficult to extract the secret key from the device. Besides using the KeyStore, the library also allows you to provide your secret key to encrypt/decrypt so that you can transfer or receive the encrypted data outside of the app.
+This library performs encryption and decryption using the AES 256-bit encryption algorithm. It uses [Android KeyStore System](https://developer.android.com/training/articles/keystore.html) to make it more difficult to extract the secret key from the device. Besides using the KeyStore, the library also allows you to provide your secret key to encrypt/decrypt so that you can transfer or receive the encrypted data outside of the app.
 
 ## Requirements
 - Android API 18 or higher
@@ -33,9 +33,8 @@ Then, add the dependency to your app build.gradle file, the latest version is: [
 import com.lokile.encrypter.encrypters.imp.Encrypter
 ......
 var encrypter = Encrypter(context=context,alias="your_alias")
-//alias: your keyword to communicate with Android KeyStore System
 ```
-- Or you can use the builder:
+- Or you can use the Builder for more options:
 ```
 import com.lokile.encrypter.encrypters.imp.Encrypter
 ......
@@ -50,23 +49,26 @@ var encrypter = Encrypter
 
       .build()
 ```
+
+The library needs the alias to bound to SecretKey in KeyStore. Using this alias the library will be able to retrieve it from KeyStore. Usually this alias bound to user, it is very helpful if your application support multi accounts login.
+
 ### Encrypt your data:
-- The simple was to perform encryption (the IV key is randomized):
+- Just call the function `encryptOrNull` to perform encryption. It will return `null` if there is an issue. Or you can handle the exception yourself by using the `encrypt` function
 ```
 val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encryptOrNull(toBeEncrypted)
-val result2:String? = encrypter.encryptOrNull(toBeEncrypted) // result1 != result2
-
-/* The library will generate a new randomized IV key when performing encryption,
-so the encrypted results are not the same for the same input*/
+val result2:String? = encrypter.encryptOrNull(toBeEncrypted) 
+// result1 != result2
 ```
-- To make the encrypted data are the same for the same input (NOT randomized IV key):
+In the above function, the library will generate a new randomized IV key by default when performing encryption, so the encrypted results are not the same for the same input
+- If you want to make the encrypted data are the same for the same input, you can set the `useRandomizeIv=false` as the following:
 ```
 val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encryptOrNull(toBeEncrypted, useRandomizeIv=false)
-val result2:String? = encrypter.encryptOrNull(toBeEncrypted, useRandomizeIv=false) // result1 == result2
+val result2:String? = encrypter.encryptOrNull(toBeEncrypted, useRandomizeIv=false) 
+// result1 == result2
 ```
-- The above functions merges the IV key and the encrypted data into single output String, use the following code instead to separate these data:
+- The above functions merges the IV key and the encrypted data into a single output String, If you want to separate them, you can update the code as the following:
 ```
 val result1:EncryptedData? = encrypter.encryptOrNull(toBeEncrypted.toByteArray())
 //result1.data
@@ -75,7 +77,8 @@ val result1:EncryptedData? = encrypter.encryptOrNull(toBeEncrypted.toByteArray()
 //result1.toByteArray()
 ```
 
-### Decrypt your data:
+### Finally, here is how to decrypt your data:
+You can use the `decryptOrNull` function to perform decryption, and it will return `null` if there is an issue. Or you can use the `decrypt` function to handle the exception yourself:
 
 ```
 val decrypted1:ByteArray? = encrypter.decryptOrNull(encrypted1)
