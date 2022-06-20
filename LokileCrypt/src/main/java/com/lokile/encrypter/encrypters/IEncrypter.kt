@@ -39,6 +39,7 @@ interface IEncrypter {
     fun decrypt(data: EncryptedData): ByteArray
     fun decrypt(data: ByteArray): ByteArray
     fun decrypt(data: String): String
+    fun decrypt(data: ByteArray, iv:ByteArray): ByteArray
 
     fun encryptOrNull(data: ByteArray, useRandomizeIv: Boolean = true): EncryptedData?
     fun encryptOrNull(data: String, useRandomizeIv: Boolean = true): String?
@@ -46,6 +47,7 @@ interface IEncrypter {
     fun decryptOrNull(data: ByteArray): ByteArray?
     fun decryptOrNull(data: String): String?
     fun decryptOrNull(data: EncryptedData): ByteArray?
+    fun decryptOrNull(data: ByteArray, iv:ByteArray): ByteArray?
 
     fun getEncryptCipher(useRandomizeIv: Boolean = true): Cipher
     fun getDecryptCipher(iv: ByteArray): Cipher

@@ -1,13 +1,13 @@
 package com.lokile.encrypter.encrypters.imp
 
 import android.content.Context
-import android.util.Base64
 import com.lokile.encrypter.encrypters.EncryptedData
 import com.lokile.encrypter.encrypters.IEncrypter
 import com.lokile.encrypter.encrypters.toEncryptedData
 import com.lokile.encrypter.secretKeyProviders.ISecretKeyProvider
 import java.security.Key
 import javax.crypto.Cipher
+import javax.crypto.spec.SecretKeySpec
 
 class Encrypter constructor(context: Context, alias: String) :
     BaseEncrypter(context, alias), IEncrypter {
@@ -30,6 +30,10 @@ class Encrypter constructor(context: Context, alias: String) :
 
     override fun decrypt(data: String): String {
         return String(decryptData(data.toEncryptedData()))
+    }
+
+    override fun decrypt(data: ByteArray, iv: ByteArray): ByteArray {
+        return decryptData(EncryptedData(data, iv))
     }
 
     override fun encryptOrNull(data: ByteArray, useRandomizeIv: Boolean): EncryptedData? {
@@ -77,6 +81,15 @@ class Encrypter constructor(context: Context, alias: String) :
         }
     }
 
+    override fun decryptOrNull(data: ByteArray, iv: ByteArray): ByteArray? {
+        return try {
+            decryptData(EncryptedData(data, iv))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
     override fun getEncryptCipher(useRandomizeIv: Boolean): Cipher {
         initCipher(Cipher.ENCRYPT_MODE, loadFixedIv(useRandomizeIv))
         return cipher
@@ -95,13 +108,13 @@ class Encrypter constructor(context: Context, alias: String) :
             return this
         }
 
-        fun setSecretKey(aesKey: Key, iv: ByteArray): Builder {
+        private fun setSecretKeyProvider(aesKey: Key, iv: ByteArray? = null) {
             encrypter.keyProvider = object : ISecretKeyProvider {
                 override fun getSecretKey(): Key {
                     return aesKey
                 }
 
-                override fun getIv(): ByteArray {
+                override fun getIv(): ByteArray? {
                     return iv
                 }
 
@@ -110,23 +123,25 @@ class Encrypter constructor(context: Context, alias: String) :
                 }
 
             }
+        }
+
+        fun setSecretKey(aesKey: ByteArray, iv: ByteArray): Builder {
+            setSecretKey(SecretKeySpec(aesKey, "AES"), iv)
+            return this
+        }
+
+        fun setSecretKey(aesKey: ByteArray): Builder {
+            setSecretKey(SecretKeySpec(aesKey, "AES"))
+            return this
+        }
+
+        fun setSecretKey(aesKey: Key, iv: ByteArray): Builder {
+            setSecretKeyProvider(aesKey, iv)
             return this
         }
 
         fun setSecretKey(aesKey: Key): Builder {
-            encrypter.keyProvider = object : ISecretKeyProvider {
-                override fun getSecretKey(): Key {
-                    return aesKey
-                }
-
-                override fun getIv(): ByteArray? {
-                    return null
-                }
-
-                override fun removeSecretKey(): Boolean {
-                    return false
-                }
-            }
+            setSecretKeyProvider(aesKey)
             return this
         }
 
