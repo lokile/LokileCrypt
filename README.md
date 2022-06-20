@@ -89,7 +89,3 @@ val decrypted1:ByteArray? = encrypter.decryptOrNull(encrypted1)
 ## Want to contribute? ##
 
 Fell free to contribute, I really like pull requests :octocat:
-
-
-
---- Finally, please give me a star if you like this library ---
