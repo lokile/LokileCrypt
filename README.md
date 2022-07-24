@@ -77,6 +77,13 @@ val result1:EncryptedData? = encrypter.encryptOrNull(toBeEncrypted.toByteArray()
 //result1.toByteArray()
 ```
 
+### Save your AesKey:
+- This library supports to save your AesKey into Android KeyStore, so that you don't need to manage to save you SecretKey anymore:
+```
+context.saveAesKeyToKeyStore(yourKeyInByteArray, yourNewAlias)
+//next: use the `yourNewAlias` to create the new `Encrypter` object
+```
+
 ### Finally, here is how to decrypt your data:
 You can use the `decryptOrNull` function to perform decryption, and it will return `null` if there is an issue. Or you can use the `decrypt` function to handle the exception yourself:
 
