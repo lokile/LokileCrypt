@@ -122,6 +122,10 @@ class Encrypter constructor(context: Context, alias: String) :
                     return false
                 }
 
+                override fun saveAesSecretKey(key: ByteArray) {
+
+                }
+
             }
         }
 

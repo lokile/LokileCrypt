@@ -6,6 +6,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.security.Key
 import java.security.KeyStore
+import javax.crypto.spec.SecretKeySpec
 
 internal class PasswordSecretKeyProvider(context: Context, alias: String, val password: String) :
     BaseSecretKeyProvider(alias) {
@@ -96,5 +97,15 @@ internal class PasswordSecretKeyProvider(context: Context, alias: String, val pa
             }
             return false
         }
+    }
+
+    override fun saveAesSecretKey(key: ByteArray) {
+        val keystore = getCustomKeyStore() ?: return
+        keystore.setEntry(
+            privateAlias,
+            KeyStore.SecretKeyEntry(SecretKeySpec(key, "AES")),
+            KeyStore.PasswordProtection(privateAlias.toCharArray())
+        )
+        saveKeyStore(keystore)
     }
 }

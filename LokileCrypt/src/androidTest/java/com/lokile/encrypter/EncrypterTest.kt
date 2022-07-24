@@ -6,14 +6,17 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.lokile.encrypter.encrypters.IEncrypter
 import com.lokile.encrypter.encrypters.imp.Encrypter
+import com.lokile.encrypter.secretKeyProviders.getRandomAesKey
 import com.lokile.encrypter.secretKeyProviders.imp.AESSecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.PasswordSecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.RSASecretKeyProvider
+import com.lokile.encrypter.secretKeyProviders.saveAesKeyToKeyStore
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.*
 import javax.crypto.KeyGenerator
 
 
@@ -112,6 +115,32 @@ class EncrypterTest {
                 it.encrypt(source.toByteArray(), false).toStringData(),
                 encrypted1.toStringData()
             )
+        }
+    }
+
+    @Test
+    fun testSaveAesKey_feature() {
+        val customKey = getRandomAesKey(256)
+        appContext.saveAesKeyToKeyStore(customKey, "p6-0")
+        var encrypter1: Encrypter? = null
+        var encrypter2: Encrypter? = null
+        try {
+            val data = "DemoText"
+            encrypter1 = Encrypter.Builder(appContext, "p6-0")
+                .build()
+
+            encrypter2 = Encrypter.Builder(appContext, "p6-1")
+                .setSecretKey(
+                    customKey
+                )
+                .build()
+
+            val en1 = encrypter1.encrypt(data)
+            val de2 = encrypter2.decryptOrNull(en1)
+            assertEquals(data, de2)
+        } finally {
+            encrypter1?.resetKeys()
+            encrypter2?.resetKeys()
         }
     }
 

@@ -10,6 +10,7 @@ import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.util.*
 import javax.crypto.Cipher
+import javax.crypto.spec.SecretKeySpec
 import javax.security.auth.x500.X500Principal
 
 internal class RSASecretKeyProvider(context: Context, alias: String) :
@@ -64,6 +65,32 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
     }
 
     @Suppress("DEPRECATION")
+    private fun <T> generateRSAKey(callback: () -> T): T? {
+        val currentLocale = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.US)
+            val start = Calendar.getInstance()
+            val end = Calendar.getInstance()
+            end.add(Calendar.YEAR, 60)
+            val spec = android.security.KeyPairGeneratorSpec.Builder(app)
+                .setAlias(privateAlias)
+                .setSubject(X500Principal("CN=$privateAlias"))
+                .setSerialNumber(BigInteger.TEN)
+                .setStartDate(start.time)
+                .setEndDate(end.time)
+                .build()
+            val kpq = KeyPairGenerator.getInstance(RSA_ALGORITHM_NAME, KEY_STORE_NAME)
+            kpq.initialize(spec)
+            kpq.generateKeyPair()
+            return callback()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            Locale.setDefault(currentLocale)
+        }
+        return null
+    }
+
     override fun getSecretKey(): Key? {
         synchronized(this) {
             val keyStore = getKeyStore()
@@ -75,29 +102,9 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
                     removeSecretKey()
                 }
             }
-            val currentLocale = Locale.getDefault()
-            try {
-                Locale.setDefault(Locale.US)
-                val start = Calendar.getInstance()
-                val end = Calendar.getInstance()
-                end.add(Calendar.YEAR, 60)
-                val spec = android.security.KeyPairGeneratorSpec.Builder(app)
-                    .setAlias(privateAlias)
-                    .setSubject(X500Principal("CN=$privateAlias"))
-                    .setSerialNumber(BigInteger.TEN)
-                    .setStartDate(start.time)
-                    .setEndDate(end.time)
-                    .build()
-                val kpq = KeyPairGenerator.getInstance(RSA_ALGORITHM_NAME, KEY_STORE_NAME)
-                kpq.initialize(spec)
-                kpq.generateKeyPair()
-                return getAesKey()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                Locale.setDefault(currentLocale)
+            return generateRSAKey {
+                getAesKey()
             }
-            return null
         }
     }
 
@@ -115,6 +122,23 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
                 e.printStackTrace()
                 return false
             }
+        }
+    }
+
+    override fun saveAesSecretKey(key: ByteArray) {
+        val keyStore = getKeyStore()
+        if (!keyStore.containsAlias(privateAlias)) {
+            generateRSAKey { }
+        }
+
+        val pref = app.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val newAesKey = SecretKeySpec(key, "AES")
+        pref.edit {
+            putString(
+                prefAlias,
+                wrapAesKey(newAesKey)
+                    .let { Base64.encodeToString(it, Base64.DEFAULT) }
+            )
         }
     }
 }
