@@ -7,6 +7,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.lokile.encrypter.encrypters.IEncrypter
 import com.lokile.encrypter.encrypters.imp.Encrypter
 import com.lokile.encrypter.secretKeyProviders.getRandomAesKey
+import com.lokile.encrypter.secretKeyProviders.hasSecretKey
 import com.lokile.encrypter.secretKeyProviders.imp.AESSecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.PasswordSecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.RSASecretKeyProvider
@@ -122,6 +123,7 @@ class EncrypterTest {
     fun testSaveAesKey_feature() {
         val customKey = getRandomAesKey(256)
         appContext.saveAesKeyToKeyStore(customKey, "p6-0")
+        assertTrue(hasSecretKey("p6-0"))
         var encrypter1: Encrypter? = null
         var encrypter2: Encrypter? = null
         try {
@@ -130,9 +132,7 @@ class EncrypterTest {
                 .build()
 
             encrypter2 = Encrypter.Builder(appContext, "p6-1")
-                .setSecretKey(
-                    customKey
-                )
+                .setSecretKey(customKey)
                 .build()
 
             val en1 = encrypter1.encrypt(data)
