@@ -45,7 +45,7 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
             val encryptKey = pref.getString(prefAlias, null)
             if (!encryptKey.isNullOrEmpty()) {
                 val key = unwrapAesKey(
-                    Base64.decode(encryptKey, Base64.DEFAULT)
+                    Base64.decode(encryptKey, Base64.NO_WRAP)
                 )
                 return key
             }
@@ -58,7 +58,7 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
             putString(
                 prefAlias,
                 wrapAesKey(aesKey)
-                    .let { Base64.encodeToString(it, Base64.DEFAULT) }
+                    .let { Base64.encodeToString(it, Base64.NO_WRAP) }
             )
         }
         return aesKey
@@ -137,7 +137,7 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
             putString(
                 prefAlias,
                 wrapAesKey(newAesKey)
-                    .let { Base64.encodeToString(it, Base64.DEFAULT) }
+                    .let { Base64.encodeToString(it, Base64.NO_WRAP) }
             )
         }
     }

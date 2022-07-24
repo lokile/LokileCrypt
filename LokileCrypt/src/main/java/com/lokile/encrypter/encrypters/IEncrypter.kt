@@ -17,7 +17,7 @@ fun ByteArray.toEncryptedData(): EncryptedData {
     )
 }
 
-fun String.toEncryptedData() = Base64.decode(this, Base64.DEFAULT).toEncryptedData()
+fun String.toEncryptedData() = Base64.decode(this, Base64.NO_WRAP).toEncryptedData()
 
 data class EncryptedData(val data: ByteArray, val iv: ByteArray) {
     fun toByteArray(): ByteArray {
@@ -29,7 +29,7 @@ data class EncryptedData(val data: ByteArray, val iv: ByteArray) {
             }.array()
     }
 
-    fun toStringData() = Base64.encodeToString(toByteArray(), Base64.DEFAULT)
+    fun toStringData() = Base64.encodeToString(toByteArray(), Base64.NO_WRAP)
 }
 
 interface IEncrypter {
