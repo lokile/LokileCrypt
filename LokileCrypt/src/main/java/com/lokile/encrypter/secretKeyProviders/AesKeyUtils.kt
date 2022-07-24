@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import com.lokile.encrypter.secretKeyProviders.imp.AESSecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.RSASecretKeyProvider
+import java.security.KeyStore
 import java.util.*
 
 
@@ -25,4 +26,10 @@ fun getRandomAesKey(keySize: Int): ByteArray {
     val random = Random()
     random.nextBytes(randomKeyBytes)
     return randomKeyBytes
+}
+
+fun hasSecretKey(alias: String): Boolean {
+    return KeyStore.getInstance("AndroidKeyStore")
+        .apply { load(null) }
+        .containsAlias("alias$alias")
 }
