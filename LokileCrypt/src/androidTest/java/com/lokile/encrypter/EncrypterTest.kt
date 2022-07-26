@@ -11,13 +11,13 @@ import com.lokile.encrypter.secretKeyProviders.hasSecretKey
 import com.lokile.encrypter.secretKeyProviders.imp.AESSecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.PasswordSecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.RSASecretKeyProvider
+import com.lokile.encrypter.secretKeyProviders.removeAesKeyFromKeyStore
 import com.lokile.encrypter.secretKeyProviders.saveAesKeyToKeyStore
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.*
 import javax.crypto.KeyGenerator
 
 
@@ -142,6 +142,15 @@ class EncrypterTest {
             encrypter1?.resetKeys()
             encrypter2?.resetKeys()
         }
+    }
+
+    @Test
+    fun testSaveAndRemoveAesKey() {
+        val newKey = getRandomAesKey(256)
+        appContext.saveAesKeyToKeyStore(newKey, "key1")
+        assertTrue(hasSecretKey("key1"))
+        appContext.removeAesKeyFromKeyStore("key1")
+        assertFalse(hasSecretKey("key1"))
     }
 
     @Test

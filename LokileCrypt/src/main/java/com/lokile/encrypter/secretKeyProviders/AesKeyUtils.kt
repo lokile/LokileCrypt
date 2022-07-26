@@ -21,6 +21,19 @@ fun Context.saveAesKeyToKeyStore(key: ByteArray, alias: String) {
 
 }
 
+fun Context.removeAesKeyFromKeyStore(alias: String) {
+    val newAlias = "alias$alias"
+    when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
+            AESSecretKeyProvider(newAlias).removeSecretKey()
+        }
+        else -> {
+            RSASecretKeyProvider(this, newAlias).removeSecretKey()
+        }
+    }
+
+}
+
 fun getRandomAesKey(keySize: Int): ByteArray {
     val randomKeyBytes = ByteArray(keySize / 8)
     val random = Random()

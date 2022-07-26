@@ -114,9 +114,6 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
                 app.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
                     .edit { remove(prefAlias) }
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    app.deleteSharedPreferences(PREF_NAME)
-                }
                 return removeKeyStoreAlias()
             } catch (e: Exception) {
                 e.printStackTrace()
