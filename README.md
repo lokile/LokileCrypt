@@ -95,7 +95,14 @@ context.saveAesKeyToKeyStore(yourKeyInByteArray, yourNewAlias)
 ```
 val newKey:ByteArray = getRandomAesKey(keySize)
 ```
-
+### Encrypt File:
+```
+val result:Boolean = encrypter.encryptFile(originalPath, encryptedFilePath)
+```
+### Decrypt File:
+```
+val result:Boolean = encrypter.decryptFile(encryptedFilePath, decryptedFilePath)
+```
 
 ## Want to contribute? ##
 
