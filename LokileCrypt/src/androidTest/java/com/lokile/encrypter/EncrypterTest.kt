@@ -347,7 +347,7 @@ class EncrypterTest {
 
     @Test
     fun testFileEncryption() {
-        val originalContent = "Hello World".toByteArray()
+        val originalContent = "Hello World ".repeat(1024 * 8).toByteArray()
         var originalFile: File? = null
         var encryptedFile: File? = null
         var decryptedFile: File? = null
@@ -372,11 +372,13 @@ class EncrypterTest {
                 encrypter.decryptFile(encryptedFile.absolutePath, decryptedFile.absolutePath)
             )
             assertTrue(
-                decryptedFile.readBytes().contentEquals(originalContent)
-            )
-            assertTrue(
                 decryptedFile.readBytes().contentEquals(originalFile.readBytes())
             )
+
+            assertTrue(
+                decryptedFile.readBytes().contentEquals(originalContent)
+            )
+
 
         } finally {
             originalFile?.delete()
