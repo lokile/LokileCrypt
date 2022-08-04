@@ -5,6 +5,10 @@ import com.lokile.encrypter.encrypters.EncryptedData
 import com.lokile.encrypter.encrypters.IEncrypter
 import com.lokile.encrypter.encrypters.toEncryptedData
 import com.lokile.encrypter.secretKeyProviders.ISecretKeyProvider
+import com.lokile.encrypter.to4ByteArray
+import com.lokile.encrypter.toIntFrom4Bytes
+import java.io.File
+import java.nio.ByteBuffer
 import java.security.Key
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec

@@ -2,12 +2,18 @@ package com.lokile.encrypter.encrypters.imp
 
 import android.content.Context
 import android.os.Build
+import android.util.Base64
+import android.util.Log
 import androidx.core.content.edit
 import com.lokile.encrypter.encrypters.EncryptedData
 import com.lokile.encrypter.encrypters.toEncryptedData
 import com.lokile.encrypter.secretKeyProviders.ISecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.AESSecretKeyProvider
 import com.lokile.encrypter.secretKeyProviders.imp.RSASecretKeyProvider
+import com.lokile.encrypter.to4ByteArray
+import com.lokile.encrypter.toIntFrom4Bytes
+import java.io.File
+import java.nio.ByteBuffer
 import java.security.Key
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -99,6 +105,98 @@ abstract class BaseEncrypter(context: Context, val alias: String) {
             }
         } else {
             return null
+        }
+    }
+
+    fun encryptFile(
+        inputPath: String,
+        encryptedOutputFile: String,
+        useRandomizeIv: Boolean
+    ): Boolean {
+        val inputFile = File(inputPath)
+        val outputFile = File(encryptedOutputFile)
+        if (!inputFile.exists()) {
+            return false
+        }
+        try {
+            inputFile.inputStream().use { input ->
+                outputFile.outputStream().use { output ->
+                    val bufferSize = 1024 * 8
+                    val buffer = ByteArray(bufferSize)
+                    var bytes = input.read(buffer)
+                    initCipher(Cipher.ENCRYPT_MODE, loadFixedIv(useRandomizeIv))
+                    output.write(
+                        ByteBuffer.allocate(cipher.iv.size + 1)
+                            .apply {
+                                put(cipher.iv.size.toByte())
+                                put(cipher.iv)
+                            }.array()
+                    )
+                    while (bytes >= 0) {
+                        val inputBytes = if (bytes == buffer.size) {
+                            buffer
+                        } else {
+                            buffer.copyOfRange(0, bytes)
+                        }
+
+                        val encryptedBytes = cipher.doFinal(inputBytes)
+                        output.write(
+                            ByteBuffer.allocate(Int.SIZE_BYTES + encryptedBytes.size)
+                                .apply {
+                                    put(encryptedBytes.size.to4ByteArray())
+                                    put(encryptedBytes)
+                                }.array()
+                        )
+                        bytes = input.read(buffer)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
+        }
+        return true
+    }
+
+    fun decryptFile(encryptedFilePath: String, outputFilePath: String): Boolean {
+        val inputFile = File(encryptedFilePath)
+        val outputFile = File(outputFilePath)
+        if (!inputFile.exists()) {
+            return false
+        }
+        try {
+            inputFile.inputStream().use { input ->
+                outputFile.outputStream().use { output ->
+                    val bufferSize = 1024 * 8 * 2
+                    val buffer = ByteArray(bufferSize)
+                    var bytes = input.read(buffer, 0, 1)
+
+                    val ivSize = buffer[0].toInt()
+                    input.read(buffer, 0, ivSize)
+
+                    val iv = buffer.copyOfRange(0, ivSize)
+                    initCipher(Cipher.DECRYPT_MODE, iv)
+
+                    while (true) {
+                        bytes = input.read(buffer, 0, Int.SIZE_BYTES)
+                        if (bytes <= 0) {
+                            return true
+                        }
+
+                        val dataSize = buffer.toIntFrom4Bytes()
+                        bytes = input.read(buffer, 0, dataSize)
+                        if (bytes <= 0) {
+                            return false
+                        }
+
+                        val originBytes = cipher.doFinal(buffer.copyOfRange(0, dataSize))
+                        output.write(originBytes)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
         }
     }
 

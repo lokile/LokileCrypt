@@ -2,6 +2,8 @@ package com.lokile.encrypter
 
 import android.content.Context
 import android.os.Build
+import android.util.Base64
+import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.lokile.encrypter.encrypters.IEncrypter
@@ -18,6 +20,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
 import javax.crypto.KeyGenerator
 
 
@@ -339,6 +342,47 @@ class EncrypterTest {
 
             assertTrue(encrypter.decrypt(e21!!) == source)
             assertTrue(encrypter.decryptOrNull(e21) == source)
+        }
+    }
+
+    @Test
+    fun testFileEncryption() {
+        val originalContent = "Hello World".toByteArray()
+        var originalFile: File? = null
+        var encryptedFile: File? = null
+        var decryptedFile: File? = null
+        var encrypter: Encrypter? = null
+        try {
+            encrypter = Encrypter(appContext, "test_file_encryption")
+            originalFile = File(appContext.filesDir, "original.txt")
+            encryptedFile = File(appContext.filesDir, "encryptedFile.txt")
+            decryptedFile = File(appContext.filesDir, "decryptedFile.txt")
+            originalFile.writeBytes(originalContent)
+            assertTrue(originalFile.readBytes().contentEquals(originalContent))
+
+            assertTrue(encrypter.encryptFile(originalFile.absolutePath, encryptedFile.absolutePath))
+
+            assertFalse(
+                encryptedFile.readBytes().contentEquals(originalContent)
+            )
+            assertFalse(
+                encryptedFile.readBytes().contentEquals(originalFile.readBytes())
+            )
+            assertTrue(
+                encrypter.decryptFile(encryptedFile.absolutePath, decryptedFile.absolutePath)
+            )
+            assertTrue(
+                decryptedFile.readBytes().contentEquals(originalContent)
+            )
+            assertTrue(
+                decryptedFile.readBytes().contentEquals(originalFile.readBytes())
+            )
+
+        } finally {
+            originalFile?.delete()
+            encryptedFile?.delete()
+            decryptedFile?.delete()
+            encrypter?.resetKeys()
         }
     }
 
