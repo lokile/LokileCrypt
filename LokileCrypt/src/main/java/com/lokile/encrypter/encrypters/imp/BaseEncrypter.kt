@@ -2,8 +2,6 @@ package com.lokile.encrypter.encrypters.imp
 
 import android.content.Context
 import android.os.Build
-import android.util.Base64
-import android.util.Log
 import androidx.core.content.edit
 import com.lokile.encrypter.encrypters.EncryptedData
 import com.lokile.encrypter.encrypters.toEncryptedData
@@ -167,25 +165,26 @@ abstract class BaseEncrypter(context: Context, val alias: String) {
         try {
             inputFile.inputStream().use { input ->
                 outputFile.outputStream().use { output ->
-                    val bufferSize = 1024 * 8 * 2
-                    val buffer = ByteArray(bufferSize)
-                    var bytes = input.read(buffer, 0, 1)
+                    var buffer = ByteArray(1024 * 8)
+                    var bytesLength = input.read(buffer, 0, 1)
 
                     val ivSize = buffer[0].toInt()
                     input.read(buffer, 0, ivSize)
 
-                    val iv = buffer.copyOfRange(0, ivSize)
-                    initCipher(Cipher.DECRYPT_MODE, iv)
+                    initCipher(Cipher.DECRYPT_MODE, buffer.copyOfRange(0, ivSize))
 
                     while (true) {
-                        bytes = input.read(buffer, 0, Int.SIZE_BYTES)
-                        if (bytes <= 0) {
+                        bytesLength = input.read(buffer, 0, Int.SIZE_BYTES)
+                        if (bytesLength <= 0) {
                             return true
                         }
 
                         val dataSize = buffer.toIntFrom4Bytes()
-                        bytes = input.read(buffer, 0, dataSize)
-                        if (bytes <= 0) {
+                        if (buffer.size < dataSize) {
+                            buffer = ByteArray(dataSize)
+                        }
+                        bytesLength = input.read(buffer, 0, dataSize)
+                        if (bytesLength <= 0) {
                             return false
                         }
 
