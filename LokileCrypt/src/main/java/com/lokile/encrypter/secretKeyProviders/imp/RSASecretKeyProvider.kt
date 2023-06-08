@@ -129,7 +129,7 @@ internal class RSASecretKeyProvider(context: Context, alias: String) :
         }
 
         val pref = app.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        val newAesKey = SecretKeySpec(key, "AES")
+        val newAesKey = SecretKeySpec(key, AES_ALGORITHM)
         pref.edit {
             putString(
                 prefAlias,

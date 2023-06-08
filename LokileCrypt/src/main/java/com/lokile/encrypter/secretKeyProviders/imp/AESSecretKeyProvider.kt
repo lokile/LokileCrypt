@@ -56,7 +56,7 @@ internal class AESSecretKeyProvider(alias: String) :
     }
 
     override fun saveAesSecretKey(key: ByteArray) {
-        val newKey = SecretKeySpec(key, "AES")
+        val newKey = SecretKeySpec(key, AES_ALGORITHM)
         val keystore = KeyStore.getInstance(KEY_STORE_NAME)
             .apply { load(null) }
 

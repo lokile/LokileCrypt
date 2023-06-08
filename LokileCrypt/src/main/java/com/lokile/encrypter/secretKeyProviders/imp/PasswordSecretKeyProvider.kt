@@ -103,7 +103,7 @@ internal class PasswordSecretKeyProvider(context: Context, alias: String, val pa
         val keystore = getCustomKeyStore() ?: return
         keystore.setEntry(
             privateAlias,
-            KeyStore.SecretKeyEntry(SecretKeySpec(key, "AES")),
+            KeyStore.SecretKeyEntry(SecretKeySpec(key, AES_ALGORITHM)),
             KeyStore.PasswordProtection(privateAlias.toCharArray())
         )
         saveKeyStore(keystore)
