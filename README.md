@@ -4,7 +4,7 @@ https://medium.com/system-weakness/simple-encryption-library-in-android-app-b282
 
 ## Overview
 This library performs encryption and decryption using the AES 256-bit encryption algorithm. It uses [Android KeyStore System](https://developer.android.com/training/articles/keystore.html) to make it more difficult to extract the secret key from the device. Besides using the KeyStore, the library also allows you to provide your secret key to encrypt/decrypt so that you can transfer or receive the encrypted data outside of the app.
-#### For the backend side: I'm building `LokileCrypt-Python`
+#### For the backend: I'm building `LokileCrypt-Python`
 
 ## Requirements
 - Android API 18 or higher
