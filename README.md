@@ -96,11 +96,13 @@ context.saveAesKeyToKeyStore(yourKeyInByteArray, yourNewAlias)
 ```
 val newKey:ByteArray = getRandomAesKey(keySize)
 ```
-### Encrypt File:
+
+### This library also supports to work with large files
+#### Encrypt a file:
 ```
 val result:Boolean = encrypter.encryptFile(originalPath, encryptedFilePath)
 ```
-### Decrypt File:
+#### Decrypt a file:
 ```
 val result:Boolean = encrypter.decryptFile(encryptedFilePath, decryptedFilePath)
 ```
