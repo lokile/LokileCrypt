@@ -1,10 +1,10 @@
-package com.lokile.encrypter.secretKeyProviders
+package com.lokile.encrypter
 
 import java.security.Key
 
-interface ISecretKeyProvider {
-    fun getSecretKey(): Key?
-    fun getIv(): ByteArray?
-    fun removeSecretKey(): Boolean
-    fun saveAesSecretKey(key: ByteArray)
+internal interface ISecretKeyProvider {
+    fun getOrCreateKey(): Key?
+    fun getIv(): ByteArray? = null
+    fun clearKey(): Boolean = false
+    fun saveKey(key: ByteArray) {}
 }

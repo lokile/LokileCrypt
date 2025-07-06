@@ -3,8 +3,7 @@
 https://medium.com/system-weakness/simple-encryption-library-in-android-app-b28218f6a14d
 
 ## Overview
-This library performs encryption and decryption using the AES 256-bit encryption algorithm. It uses [Android KeyStore System](https://developer.android.com/training/articles/keystore.html) to make it more difficult to extract the secret key from the device. Besides using the KeyStore, the library also allows you to provide your secret key to encrypt/decrypt so that you can transfer or receive the encrypted data outside of the app.
-#### For the backend: I'm building `LokileCrypt-Python`
+This library performs encryption and decryption using the AES 256-bit encryption algorithm. It uses [Android KeyStore System](https://developer.android.com/training/articles/keystore.html) to make it more difficult to extract the secret key from the device. In addition to using the KeyStore, the library also allows you to provide your own secret key, enabling you to encrypt or decrypt data that is transferred outside of the app
 
 ## Requirements
 - Android API 18 or higher
@@ -31,16 +30,16 @@ Then, add the dependency to your app build.gradle file, the latest version is: [
 ### Create the object:
 - Just create it:
 ```
-import com.lokile.encrypter.encrypters.imp.Encrypter
+import com.lokile.encrypter.encrypters.Encrypter
 ......
-var encrypter = Encrypter(context=context,alias="your_alias")
+var encrypter = Encrypter(alias="your_alias")
 ```
 - Or you can use the Builder for more options:
 ```
-import com.lokile.encrypter.encrypters.imp.Encrypter
+import com.lokile.encrypter.encrypters.Encrypter
 ......
 var encrypter = Encrypter
-      .Builder(appContext, "your_alias")
+      .Builder("your_alias")
       
       //set your own keys instead of using Android KeyStore System
       .setSecretKey(your_aes_key, your_iv_key) 
@@ -51,35 +50,28 @@ var encrypter = Encrypter
       .build()
 ```
 
-The library needs the alias to bound to SecretKey in KeyStore. Using this alias the library will be able to retrieve it from KeyStore. Usually this alias bound to user, it is very helpful if your application support multi accounts login.
+The library requires an alias that is bound to a SecretKey in the KeyStore. Using this alias, the library can retrieve the key from the KeyStore. Typically, this alias is associated with a user, which is especially useful if your application supports multiple account logins
 
 ### Encrypt your data:
-- Just call the function `encryptOrNull` to perform encryption. It will return `null` if there is an issue. Or you can handle the exception yourself by using the `encrypt` function
+- Just call the function `encryptOrNull` to perform encryption. It will return `null` if there is an issue.
 ```
 val toBeEncrypted="Hello World!"
 val result1:String? = encrypter.encryptOrNull(toBeEncrypted)
 val result2:String? = encrypter.encryptOrNull(toBeEncrypted) 
 // result1 != result2
 ```
-In the above function, the library will generate a new randomized IV key by default when performing encryption, so the encrypted results are not the same for the same input
-- If you want to make the encrypted data are the same for the same input, you can set the `useRandomizeIv=false` as the following:
-```
-val toBeEncrypted="Hello World!"
-val result1:String? = encrypter.encryptOrNull(toBeEncrypted, useRandomizeIv=false)
-val result2:String? = encrypter.encryptOrNull(toBeEncrypted, useRandomizeIv=false) 
-// result1 == result2
-```
+In the function above, the library generates a new random IV by default when performing encryption, so the encrypted result will differ even for the same input
 - The above functions merges the IV key and the encrypted data into a single output String, If you want to separate them, you can update the code as the following:
 ```
 val result1:EncryptedData? = encrypter.encryptOrNull(toBeEncrypted.toByteArray())
 //result1.data
 //result1.iv
-//result1.toStringData()
+//result1.stringData
 //result1.toByteArray()
 ```
 
 ### Here is how to decrypt your data:
-You can use the `decryptOrNull` function to perform decryption, and it will return `null` if there is an issue. Or you can use the `decrypt` function to handle the exception yourself:
+You can use the `decryptOrNull` function to perform decryption, and it will return `null` if there is an issue:
 
 ```
 val decrypted1:ByteArray? = encrypter.decryptOrNull(encrypted1)
@@ -87,14 +79,14 @@ val decrypted1:ByteArray? = encrypter.decryptOrNull(encrypted1)
 ```
 
 ### Save your AesKey:
-- This library supports to save your AesKey into Android KeyStore, so that you don't need to manage to save you SecretKey in a secure place anymore:
+– This library supports saving your AES key into the Android KeyStore, so you no longer need to manage storing the SecretKey in a secure location yourself:
 ```
-context.saveAesKeyToKeyStore(yourKeyInByteArray, yourNewAlias)
+Encrypter.saveAesKeyToKeyStore(yourKeyInByteArray, yourNewAlias)
 //next: use the `yourNewAlias` to create the new `Encrypter` object
 ```
 ### Generate a new random AesKey:
 ```
-val newKey:ByteArray = getRandomAesKey(keySize)
+val newKey:ByteArray = Encrypter.getRandomAesKey(keySize)
 ```
 
 ### This library also supports to work with large files

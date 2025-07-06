@@ -1,48 +1,29 @@
 package com.lokile.encrypter.secretKeyProviders
 
 import android.content.Context
-import android.os.Build
-import com.lokile.encrypter.secretKeyProviders.imp.AESSecretKeyProvider
-import com.lokile.encrypter.secretKeyProviders.imp.RSASecretKeyProvider
-import java.security.KeyStore
-import java.util.*
+import com.lokile.encrypter.AESSecretKeyProvider
+import com.lokile.encrypter.encrypters.Encrypter
+import com.lokile.encrypter.keyStore
+import java.util.Random
 
 
-fun Context.saveAesKeyToKeyStore(key: ByteArray, alias: String) {
+fun Encrypter.Companion.saveAesKeyToDevice(key: ByteArray, alias: String) {
     val newAlias = "alias$alias"
-    when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
-            AESSecretKeyProvider(newAlias).saveAesSecretKey(key)
-        }
-        else -> {
-            RSASecretKeyProvider(this, newAlias).saveAesSecretKey(key)
-        }
-    }
-
+    AESSecretKeyProvider(newAlias).saveKey(key)
 }
 
-fun Context.removeAesKeyFromKeyStore(alias: String) {
+fun Encrypter.Companion.removeAesKeyFromDevice(alias: String) {
     val newAlias = "alias$alias"
-    when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
-            AESSecretKeyProvider(newAlias).removeSecretKey()
-        }
-        else -> {
-            RSASecretKeyProvider(this, newAlias).removeSecretKey()
-        }
-    }
-
+    AESSecretKeyProvider(newAlias).clearKey()
 }
 
-fun getRandomAesKey(keySize: Int): ByteArray {
+fun Encrypter.Companion.getRandomAesKey(keySize: Int): ByteArray {
     val randomKeyBytes = ByteArray(keySize / 8)
     val random = Random()
     random.nextBytes(randomKeyBytes)
     return randomKeyBytes
 }
 
-fun hasSecretKey(alias: String): Boolean {
-    return KeyStore.getInstance("AndroidKeyStore")
-        .apply { load(null) }
-        .containsAlias("alias$alias")
+fun Encrypter.Companion.hasSecretKey(alias: String): Boolean {
+    return keyStore.containsAlias("alias$alias")
 }

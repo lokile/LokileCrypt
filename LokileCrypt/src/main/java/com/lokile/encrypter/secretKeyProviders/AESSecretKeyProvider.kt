@@ -1,30 +1,31 @@
-package com.lokile.encrypter.secretKeyProviders.imp
+package com.lokile.encrypter
 
-import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.security.keystore.KeyProtection
-import androidx.annotation.RequiresApi
+import com.lokile.encrypter.AES_ALGORITHM
+import com.lokile.encrypter.KEY_SIZE
+import com.lokile.encrypter.KEY_STORE_NAME
+import com.lokile.encrypter.keyStore
+import com.lokile.encrypter.removeKeyStoreAlias
 import java.security.Key
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
-@RequiresApi(Build.VERSION_CODES.M)
-internal class AESSecretKeyProvider(alias: String) :
-    BaseSecretKeyProvider(alias) {
+internal class AESSecretKeyProvider(private val alias: String) : ISecretKeyProvider {
 
-    override fun getSecretKey(): Key? {
+    override fun getOrCreateKey(): Key? {
         synchronized(this) {
             try {
-                val keyStore = getKeyStore()
-                if (keyStore.containsAlias(privateAlias)) {
+                val keyStore = keyStore
+                if (keyStore.containsAlias(alias)) {
                     try {
-                        return keyStore.getKey(privateAlias, null) as SecretKey
+                        return keyStore.getKey(alias, null) as SecretKey
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        keyStore.deleteEntry(privateAlias)
+                        keyStore.deleteEntry(alias)
                     }
                 }
                 return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEY_STORE_NAME)
@@ -32,7 +33,7 @@ internal class AESSecretKeyProvider(alias: String) :
                         init(
                             KeyGenParameterSpec
                                 .Builder(
-                                    privateAlias,
+                                    alias,
                                     KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
                                 )
                                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
@@ -49,19 +50,19 @@ internal class AESSecretKeyProvider(alias: String) :
         }
     }
 
-    override fun removeSecretKey(): Boolean {
+    override fun clearKey(): Boolean {
         synchronized(this) {
-            return removeKeyStoreAlias()
+            return removeKeyStoreAlias(alias = alias)
         }
     }
 
-    override fun saveAesSecretKey(key: ByteArray) {
+    override fun saveKey(key: ByteArray) {
         val newKey = SecretKeySpec(key, AES_ALGORITHM)
         val keystore = KeyStore.getInstance(KEY_STORE_NAME)
             .apply { load(null) }
 
         keystore.setEntry(
-            privateAlias, KeyStore.SecretKeyEntry(newKey),
+            alias, KeyStore.SecretKeyEntry(newKey),
             KeyProtection
                 .Builder(KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
