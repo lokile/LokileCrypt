@@ -32,13 +32,13 @@ Then, add the dependency to your app build.gradle file, the latest version is: [
 ```
 import com.lokile.encrypter.encrypters.Encrypter
 ......
-var encrypter = Encrypter(alias="your_alias")
+val encrypter = Encrypter(alias="your_alias")
 ```
 - Or you can use the Builder for more options:
 ```
 import com.lokile.encrypter.encrypters.Encrypter
 ......
-var encrypter = Encrypter
+val encrypter = Encrypter
       .Builder("your_alias")
       
       //set your own keys instead of using Android KeyStore System
