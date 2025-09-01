@@ -10,19 +10,10 @@ This library performs encryption and decryption using the AES 256-bit encryption
 - Java 1.8+
 
 ## Installation
-Add the following code to your root build.gradle at the end of repositories:
-```
-  allprojects {
-      repositories {
-        ...
-        maven { url 'https://jitpack.io' }
-      }
-  }
-```
-Then, add the dependency to your app build.gradle file, the latest version is: [![](https://jitpack.io/v/lokile/LokileCrypt.svg)](https://jitpack.io/#lokile/LokileCrypt)
+Add the dependency to your app build.gradle file, the latest version is: [![Maven Central](https://img.shields.io/maven-central/v/io.github.lokile/lokile-crypt?label=Maven%20Central)]
 ```
   dependencies {
-    implementation 'com.github.lokile:LokileCrypt:latest_version'
+    implementation("io.github.lokile:lokile-crypt:1.2.7")
   }
 ```
 

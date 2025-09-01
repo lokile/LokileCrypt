@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DataEncrypterDemo"
+rootProject.name = "DataEncrypter"
 include(":app")
 include(":LokileCrypt")
