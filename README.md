@@ -6,14 +6,14 @@ https://medium.com/system-weakness/simple-encryption-library-in-android-app-b282
 This library performs encryption and decryption using the AES 256-bit encryption algorithm. It uses [Android KeyStore System](https://developer.android.com/training/articles/keystore.html) to make it more difficult to extract the secret key from the device. In addition to using the KeyStore, the library also allows you to provide your own secret key, enabling you to encrypt or decrypt data that is transferred outside of the app
 
 ## Requirements
-- Android API 18 or higher
+- Android API 23 or higher
 - Java 1.8+
 
 ## Installation
 Add the dependency to your app build.gradle file, the latest version is: [![Maven Central](https://img.shields.io/maven-central/v/io.github.lokile/lokile-crypt?label=Maven%20Central)]
 ```
   dependencies {
-    implementation("io.github.lokile:lokile-crypt:1.2.7")
+    implementation("io.github.lokile:lokile-crypt:latest_version")
   }
 ```
 
