@@ -13,7 +13,7 @@ This library performs encryption and decryption using the AES 256-bit encryption
 Add the dependency to your app build.gradle file, the latest version is: [![Maven Central](https://img.shields.io/maven-central/v/io.github.lokile/lokile-crypt?label=Maven%20Central)]
 ```
   dependencies {
-    implementation("io.github.lokile:lokile-crypt:1.2.7")
+    implementation("io.github.lokile:lokile-crypt:latest_version")
   }
 ```
 
