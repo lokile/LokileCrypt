@@ -1,95 +1,94 @@
 # LokileCrypt-Android
 
-https://medium.com/system-weakness/simple-encryption-library-in-android-app-b28218f6a14d
+[Simple Encryption Library in Android App](https://medium.com/system-weakness/simple-encryption-library-in-android-app-b28218f6a14d)
 
 ## Overview
-This library performs encryption and decryption using the AES 256-bit encryption algorithm. It uses [Android KeyStore System](https://developer.android.com/training/articles/keystore.html) to make it more difficult to extract the secret key from the device. In addition to using the KeyStore, the library also allows you to provide your own secret key, enabling you to encrypt or decrypt data that is transferred outside of the app
+LokileCrypt is a lightweight library for AES 256-bit encryption and decryption.  
+It integrates with the [Android KeyStore System](https://developer.android.com/training/articles/keystore.html), making it harder to extract keys from a device.  
+In addition, you can provide your own AES key, allowing you to encrypt or decrypt data that needs to be shared outside the app.
+
+## Features
+- **AES-256 encryption/decryption** for strings, byte arrays, and files  
+- **Android KeyStore integration** (store and retrieve keys by ID)  
+- **Custom key support** (use your own `Key` or `ByteArray`)  
+- **Automatic IV handling** (unique IV per encryption)  
+- **Key management utilities**: save, remove, and check if a key exists  
+- **Large file support**: encrypt and decrypt files efficiently  
+- **Coroutines support** with `suspend` functions  
 
 ## Requirements
 - Android API 23 or higher
-- Java 1.8+
 
 ## Installation
-Add the dependency to your app build.gradle file, the latest version is: [![Maven Central](https://img.shields.io/maven-central/v/io.github.lokile/lokile-crypt?label=Maven%20Central)]
-```
-  dependencies {
+Add the dependency to your app’s `build.gradle` file. The latest version is:  
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.lokile/lokile-crypt?label=Maven%20Central)]
+
+```gradle
+dependencies {
     implementation("io.github.lokile:lokile-crypt:latest_version")
-  }
+}
 ```
 
 ## Usage:
-### Create the object:
-- Just create it:
+### 1. Create the object:
+You can create an `Encrypter` in three ways:
 ```
-import com.lokile.encrypter.encrypters.Encrypter
-......
-val encrypter = Encrypter(alias="your_alias")
-```
-- Or you can use the Builder for more options:
-```
-import com.lokile.encrypter.encrypters.Encrypter
-......
-val encrypter = Encrypter
-      .Builder("your_alias")
-      
-      //set your own keys instead of using Android KeyStore System
-      .setSecretKey(your_aes_key, your_iv_key) 
+// 1. Using an ID (stored in Android KeyStore)
+val encrypter1 = Encrypter(id = "user_123")
 
-      //default is "AES/CBC/PKCS7PADDING"
-      .setEncryptAlgorithm("your_encrypt_algorithm") 
+// 2. Using an existing AES Key object
+val encrypter2 = Encrypter(aesKey = key, iv = ivBytes)
 
-      .build()
-```
-
-The library requires an alias that is bound to a SecretKey in the KeyStore. Using this alias, the library can retrieve the key from the KeyStore. Typically, this alias is associated with a user, which is especially useful if your application supports multiple account logins
-
-### Encrypt your data:
-- Just call the function `encryptOrNull` to perform encryption. It will return `null` if there is an issue.
-```
-val toBeEncrypted="Hello World!"
-val result1:String? = encrypter.encryptOrNull(toBeEncrypted)
-val result2:String? = encrypter.encryptOrNull(toBeEncrypted) 
-// result1 != result2
-```
-In the function above, the library generates a new random IV by default when performing encryption, so the encrypted result will differ even for the same input
-- The above functions merges the IV key and the encrypted data into a single output String, If you want to separate them, you can update the code as the following:
-```
-val result1:EncryptedData? = encrypter.encryptOrNull(toBeEncrypted.toByteArray())
-//result1.data
-//result1.iv
-//result1.stringData
-//result1.toByteArray()
-```
-
-### Here is how to decrypt your data:
-You can use the `decryptOrNull` function to perform decryption, and it will return `null` if there is an issue:
+// 3. Using a raw AES key as ByteArray
+val encrypter3 = Encrypter(aesKey = rawKeyBytes, iv = ivBytes)
 
 ```
-val decrypted1:ByteArray? = encrypter.decryptOrNull(encrypted1)
-// val decrypted1Str = String(decrypted1)
+### 2. Encrypt data
+```
+val text = "Hello World!"
+val encrypted: String? = encrypter1.encryptOrNull(text)
+```
+- Encrypt as `EncryptedData` (access raw bytes and IV separately):
+```
+val encrypted: EncryptedData? = encrypter1.encryptOrNull(text.toByteArray())
+// encrypted.data
+// encrypted.iv
+// encrypted.stringData
+// encrypted.toByteArray()
+
 ```
 
-### Save your AesKey:
-– This library supports saving your AES key into the Android KeyStore, so you no longer need to manage storing the SecretKey in a secure location yourself:
+### 3. Decrypt data
 ```
-Encrypter.saveAesKeyToKeyStore(yourKeyInByteArray, yourNewAlias)
-//next: use the `yourNewAlias` to create the new `Encrypter` object
-```
-### Generate a new random AesKey:
-```
-val newKey:ByteArray = Encrypter.getRandomAesKey(keySize)
+val decrypted: String? = encrypter1.decryptOrNull(encryptedString)
+
+val decryptedBytes: ByteArray? = encrypter1.decryptOrNull(encryptedData)
+val decryptedStr = decryptedBytes?.let { String(it) }
+
 ```
 
-### This library also supports to work with large files
-#### Encrypt a file:
+### 4. Work with files
 ```
-val result:Boolean = encrypter.encryptFile(originalPath, encryptedFilePath)
-```
-#### Decrypt a file:
-```
-val result:Boolean = encrypter.decryptFile(encryptedFilePath, decryptedFilePath)
+val successEncrypt: Boolean = encrypter1.encryptFile("path/to/input.txt", "path/to/encrypted.bin")
+val successDecrypt: Boolean = encrypter1.decryptFile("path/to/encrypted.bin", "path/to/decrypted.txt")
 ```
 
-## Want to contribute? ##
+### 5. Key management
+```
+// Save your own AES key into Android KeyStore
+Encrypter.saveSecretKeyToDevice(aesKeyBytes, "user_123")
 
-Fell free to contribute, I really like pull requests :octocat:
+// Remove a stored key
+Encrypter.removeSecretKeyFromDevice("user_123")
+
+// Check if a key exists
+val hasKey: Boolean = Encrypter.hasSecretKey("user_123")
+
+// Generate a new random AES key
+val newKey: ByteArray = Encrypter.newSecretKey() // default = 256 bits
+
+```
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues or submit pull requests :octocat:

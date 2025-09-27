@@ -4,13 +4,9 @@ import android.content.Context
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.lokile.encrypter.encrypters.Encrypter
-import com.lokile.encrypter.AESSecretKeyProvider
-import com.lokile.encrypter.secretKeyProviders.getRandomAesKey
-import com.lokile.encrypter.secretKeyProviders.hasSecretKey
-import com.lokile.encrypter.secretKeyProviders.removeAesKeyFromDevice
-import com.lokile.encrypter.secretKeyProviders.saveAesKeyToDevice
-import com.lokile.encrypter.stringData
+import com.lokile.encrypter.encrypterImpl.asByteArray
+import com.lokile.encrypter.encrypterImpl.asString
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -20,7 +16,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
-import java.util.Random
 import javax.crypto.KeyGenerator
 
 
@@ -28,48 +23,29 @@ import javax.crypto.KeyGenerator
 class EncrypterTest {
     var encrypters = mutableListOf<Encrypter>()
     lateinit var appContext: Context
-//
-//    @After
-//    fun tearDown() {
-//        encrypters.forEach {
-//            it.resetKeys()
-//        }
-//    }
 
     @Before
     fun before() {
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            encrypters.add(
-                Encrypter.Builder("p1")
-                    .build()
-            )
+            encrypters.add(Encrypter("p1"))
         }
         //test custom key
         encrypters.add(
-            Encrypter.Builder("p4")
-                .setSecretKey(
-                    KeyGenerator.getInstance("AES")
-                        .apply {
-                            init(256)
-                        }.generateKey()
-                )
-                .build()
+            Encrypter(Encrypter.newSecretKey())
         )
         encrypters.add(
-            Encrypter.Builder("p5")
-                .setSecretKey(
-                    KeyGenerator.getInstance("AES")
-                        .apply {
-                            init(256)
-                        }.generateKey().encoded
-                )
-                .build()
+            Encrypter(
+                KeyGenerator.getInstance("AES")
+                    .apply {
+                        init(256)
+                    }.generateKey()
+            )
         )
     }
 
     @Test
-    fun testEncryptersInStringWithFixedIv() {
+    fun encryptersInStringWithFixedIv() = runBlocking<Unit> {
         encrypters.forEach { encrypter ->
             val source = "DemoText"
             val encrypted1 = encrypter.encryptOrNull(source)!!
@@ -79,7 +55,7 @@ class EncrypterTest {
     }
 
     @Test
-    fun testEncryptersInStringWithRandomIv() {
+    fun encryptersInStringWithRandomIv() = runBlocking<Unit> {
         encrypters.forEach { encrypter ->
             val source = "DemoText"
             val encrypted1 = encrypter.encryptOrNull(source)!!
@@ -90,13 +66,13 @@ class EncrypterTest {
     }
 
     @Test
-    fun testEncryptersInByte() {
+    fun encryptersInByte() = runBlocking<Unit> {
         encrypters.forEach {
             val source = "DemoText"
             val encrypted1 = it.encryptOrNull(source.toByteArray())!!
             assertNotNull(encrypted1)
             val decrypted1 = it.decryptOrNull(encrypted1)!!
-            val decrypted2 = it.decryptOrNull(encrypted1.byteArray)!!
+            val decrypted2 = it.decryptOrNull(encrypted1.asByteArray)!!
             assertTrue(decrypted1.contentEquals(decrypted2))
             assertEquals(source, String(decrypted1))
             assertEquals(source, String(decrypted2))
@@ -104,47 +80,44 @@ class EncrypterTest {
     }
 
     @Test
-    fun testSaveAndRemoveAesKey() {
-        val newKey = Encrypter.getRandomAesKey(256)
-        Encrypter.saveAesKeyToDevice(newKey, "key1")
+    fun saveAndRemoveAesKey() = runBlocking<Unit> {
+        val newKey = Encrypter.newSecretKey()
+        Encrypter.saveSecretKeyToDevice(newKey, "key1")
         assertTrue(Encrypter.hasSecretKey("key1"))
-        Encrypter.removeAesKeyFromDevice("key1")
+        Encrypter.removeSecretKeyFromDevice("key1")
         assertFalse(Encrypter.hasSecretKey("key1"))
     }
 
     @Test
-    fun testEncryptersInByteWithRandomIv() {
+    fun encryptersInByteWithRandomIv() = runBlocking<Unit> {
         encrypters.forEach {
             val source = "DemoText"
             val encrypted1 = it.encryptOrNull(source.toByteArray())!!
             assertNotNull(encrypted1)
             val decrypted1 = it.decryptOrNull(encrypted1)!!
-            val decrypted2 = it.decryptOrNull(encrypted1.byteArray)!!
+            val decrypted2 = it.decryptOrNull(encrypted1.asByteArray)!!
 
             assertTrue(decrypted1.contentEquals(decrypted2))
             assertEquals(source, String(decrypted1))
             assertEquals(source, String(decrypted2))
 
             assertNotEquals(
-                it.encryptOrNull(source.toByteArray())!!.stringData,
-                encrypted1.stringData
+                it.encryptOrNull(source.toByteArray())!!.asString,
+                encrypted1.asString
             )
         }
     }
 
     @Test
-    fun testFixed_IV_WithCustomKeyProvider() {
+    fun fixed_IV_WithCustomKeyProvider() = runBlocking<Unit> {
         val originalData = " Hello world!"
-        val encrypter1 = Encrypter
-            .Builder("testAlias1")
-            .setSecretKey(
-                KeyGenerator.getInstance("AES")
-                    .apply {
-                        init(256)
-                    }.generateKey(),
-                "1234567812345678".toByteArray()
-            )
-            .build()
+        val encrypter1 = Encrypter(
+            KeyGenerator.getInstance("AES")
+                .apply {
+                    init(256)
+                }.generateKey(),
+            "1234567812345678".toByteArray()
+        )
         val ed11 = encrypter1.encryptOrNull(originalData)
         val ed12 = encrypter1.encryptOrNull(originalData)
         val ed13 = encrypter1.encryptOrNull(originalData)
@@ -152,14 +125,12 @@ class EncrypterTest {
         assertEquals(ed12, ed13)
         assertEquals(encrypter1.encryptOrNull(originalData), ed11)
 
-        val encrypter2 = Encrypter.Builder("testAlias2")
-            .setSecretKey(
-                KeyGenerator.getInstance("AES")
-                    .apply {
-                        init(256)
-                    }.generateKey()
-            )
-            .build()
+        val encrypter2 = Encrypter(
+            KeyGenerator.getInstance("AES")
+                .apply {
+                    init(256)
+                }.generateKey()
+        )
         val ed21 = encrypter2.encryptOrNull(originalData)
         val ed22 = encrypter2.encryptOrNull(originalData)
         val ed23 = encrypter2.encryptOrNull(originalData)
@@ -168,14 +139,12 @@ class EncrypterTest {
         assertNotEquals(ed22, ed23)
         assertNotEquals(ed23, ed24)
 
-        val encrypter3 = Encrypter.Builder("testAlias3")
-            .setSecretKey(
-                KeyGenerator.getInstance("AES")
-                    .apply {
-                        init(256)
-                    }.generateKey().encoded
-            )
-            .build()
+        val encrypter3 = Encrypter(
+            KeyGenerator.getInstance("AES")
+                .apply {
+                    init(256)
+                }.generateKey().encoded
+        )
         val ed31 = encrypter3.encryptOrNull(originalData)
         val ed32 = encrypter3.encryptOrNull(originalData)
         val ed33 = encrypter3.encryptOrNull(originalData)
@@ -183,15 +152,13 @@ class EncrypterTest {
         assertNotEquals(ed31, ed32)
         assertNotEquals(ed33, ed34)
 
-        val encrypter4 = Encrypter.Builder("testAlias4")
-            .setSecretKey(
-                KeyGenerator.getInstance("AES")
-                    .apply {
-                        init(256)
-                    }.generateKey().encoded,
-                "1234567812345678".toByteArray()
-            )
-            .build()
+        val encrypter4 = Encrypter(
+            KeyGenerator.getInstance("AES")
+                .apply {
+                    init(256)
+                }.generateKey().encoded,
+            "1234567812345678".toByteArray()
+        )
         val ed41 = encrypter4.encryptOrNull(originalData)
         val ed42 = encrypter4.encryptOrNull(originalData)
         val ed43 = encrypter4.encryptOrNull(originalData)
@@ -202,12 +169,12 @@ class EncrypterTest {
     }
 
     @Test
-    fun testGetOrNullFunctions() {
+    fun getOrNullFunctions() = runBlocking<Unit> {
         encrypters.forEach { encrypter ->
             val source = "DemoText"
             val e1 = encrypter.encryptOrNull(source.toByteArray())!!
             val e11 = encrypter.encryptOrNull(source.toByteArray())!!
-            assertNotEquals(e1.stringData, e11.stringData)
+            assertNotEquals(e1.asString, e11.asString)
 
             val e2 = encrypter.encryptOrNull(source)!!
             val e21 = encrypter.encryptOrNull(source)!!
@@ -223,13 +190,13 @@ class EncrypterTest {
             )
 
             assertTrue(
-                encrypter.decryptOrNull(e1.byteArray).contentEquals(
+                encrypter.decryptOrNull(e1.asByteArray).contentEquals(
                     source.toByteArray()
                 )
             )
 
             assertTrue(
-                encrypter.decryptOrNull(e11.byteArray).contentEquals(
+                encrypter.decryptOrNull(e11.asByteArray).contentEquals(
                     source.toByteArray()
                 )
             )
@@ -239,12 +206,12 @@ class EncrypterTest {
     }
 
     @Test
-    fun testFileEncryption() {
-        val originalContent = "Hello World ".repeat(1024 * 8).toByteArray()
+    fun largeFileEncryption() = runBlocking<Unit> {
+        val originalContent = (0..1024 * 1024).joinToString(" ") { "Hello world $it" }.toByteArray()
         var originalFile: File? = null
         var encryptedFile: File? = null
         var decryptedFile: File? = null
-        var encrypter: Encrypter? = null
+        var encrypter: Encrypter?
         try {
             encrypter = Encrypter("test_file_encryption")
             originalFile = File(appContext.filesDir, "original.txt")

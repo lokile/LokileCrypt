@@ -1,6 +1,6 @@
-package com.lokile.encrypter.encrypters
+package com.lokile.encrypter.encrypterImpl
 
-import com.lokile.encrypter.ISecretKeyProvider
+import com.lokile.encrypter.secretKeyProviders.ISecretKeyProvider
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 
@@ -11,8 +11,8 @@ internal class CipherProvider(
     private val cipher by lazy { Cipher.getInstance(algorithm) }
 
     fun getEncryptCipher(): Cipher {
-        val key = keyProvider.getOrCreateKey() ?: error("Can't create encrypt key")
-        val iv = keyProvider.getIv()
+        val key = keyProvider.secretKey ?: error("Can't create encrypt key")
+        val iv = keyProvider.iv
         if (iv != null) {
             cipher.init(
                 Cipher.ENCRYPT_MODE,
@@ -29,8 +29,8 @@ internal class CipherProvider(
     }
 
     fun getDecryptCipher(iv: ByteArray? = null): Cipher {
-        val key = keyProvider.getOrCreateKey() ?: error("Can't create encrypt key")
-        val decryptIv = iv ?: keyProvider.getIv() ?: error("IV must not be null")
+        val key = keyProvider.secretKey ?: error("Can't create encrypt key")
+        val decryptIv = iv ?: keyProvider.iv ?: error("IV must not be null")
         cipher.init(
             Cipher.DECRYPT_MODE,
             key,

@@ -12,7 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.lokile.encrypter.encrypters.Encrypter
+import androidx.lifecycle.coroutineScope
+import com.lokile.encrypter.Encrypter
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,18 +33,20 @@ class MainActivity : ComponentActivity() {
     }
 
     fun demoByteEncrypter() {
-        val e = Encrypter("demo")
-        val source = "demo123"
-        val encrypted = e.encryptOrNull(source.toByteArray())
-        if (encrypted != null) {
-            val decrypted = e.decryptOrNull(encrypted)
-            if (decrypted != null) {
-                Log.d("AndroidUtils", "Successful, data=${String(decrypted)}")
+        lifecycle.coroutineScope.launch {
+            val e = Encrypter("demo")
+            val source = "demo123"
+            val encrypted = e.encryptOrNull(source.toByteArray())
+            if (encrypted != null) {
+                val decrypted = e.decryptOrNull(encrypted)
+                if (decrypted != null) {
+                    Log.d("AndroidUtils", "Successful, data=${String(decrypted)}")
+                } else {
+                    Log.d("AndroidUtils", "Failed to decrypt")
+                }
             } else {
-                Log.d("AndroidUtils", "Failed to decrypt")
+                Log.d("AndroidUtils", "failed to encrypt")
             }
-        } else {
-            Log.d("AndroidUtils", "failed to encrypt")
         }
     }
 }
