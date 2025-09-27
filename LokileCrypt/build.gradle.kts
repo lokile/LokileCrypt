@@ -49,7 +49,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.lokile",
         artifactId = "lokile-crypt",
-        version = "1.2.7"
+        version = "1.2.8"
     )
 
     // Configure POM metadata for the published artifact
