@@ -51,7 +51,9 @@ internal class EncrypterImpl(
     }
 
     override suspend fun decryptOrNull(data: String): String? {
-        return decryptDataInternal(data.asEncryptedData)?.let { String(it) }
+        return data.asEncryptedData
+            ?.let { decryptDataInternal(it) }
+            ?.let { String(it) }
     }
 
     override suspend fun decryptOrNull(data: EncryptedData): ByteArray? {

@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.lokile.dataencrypterdemo"
-        minSdk = 23
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(projects.lokileCrypt)
+    implementation(libs.loki.compose.animated.border)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

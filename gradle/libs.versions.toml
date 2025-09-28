@@ -1,5 +1,6 @@
 [versions]
 agp = "8.11.1"
+composeAnimatedBorder = "1.0.0"
 kotlin = "2.2.10"
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -13,6 +14,7 @@ material = "1.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+loki-compose-animated-border = { module = "io.github.lokile:compose-animated-border", version.ref = "composeAnimatedBorder" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

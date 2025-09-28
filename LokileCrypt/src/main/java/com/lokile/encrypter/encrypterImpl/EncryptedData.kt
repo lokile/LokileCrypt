@@ -6,7 +6,12 @@ import java.util.Arrays
 
 class EncryptedData(val data: ByteArray, val iv: ByteArray)
 
-val String.asEncryptedData get() = Base64.decode(this, Base64.NO_WRAP).asEncryptedData
+val String.asEncryptedData
+    get() = try {
+        Base64.decode(this, Base64.NO_WRAP).asEncryptedData
+    } catch (_: Exception) {
+        null
+    }
 
 val EncryptedData.asByteArray
     get(): ByteArray {

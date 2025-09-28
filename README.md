@@ -2,6 +2,9 @@
 
 [Simple Encryption Library in Android App](https://medium.com/system-weakness/simple-encryption-library-in-android-app-b28218f6a14d)
 
+<img src="https://github.com/user-attachments/assets/63ad2bdc-9a6e-457e-823d-4af2da6f4d91" alt="Demo" width="25%"/>
+
+
 ## Overview
 LokileCrypt is a lightweight library for AES 256-bit encryption and decryption.  
 It integrates with the [Android KeyStore System](https://developer.android.com/training/articles/keystore.html), making it harder to extract keys from a device.  
