@@ -21,7 +21,7 @@ In addition, you can provide your own AES key, allowing you to encrypt or decryp
 
 ## Installation
 Add the dependency to your app’s `build.gradle` file. The latest version is:  
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.lokile/lokile-crypt?label=Maven%20Central)]
+![Maven Central](https://img.shields.io/maven-central/v/io.github.lokile/lokile-crypt?label=Maven%20Central)
 
 ```gradle
 dependencies {
